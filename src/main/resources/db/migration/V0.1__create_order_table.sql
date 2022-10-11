@@ -35,7 +35,7 @@ CREATE TABLE accounting_transaction(
      status VARCHAR(100)
 );
 
-CREATE TABLE order(
+CREATE TABLE order_table(
     id INT(8) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     order_type INT(8) NOT NULL,
     username VARCHAR(100) NOT NULL,

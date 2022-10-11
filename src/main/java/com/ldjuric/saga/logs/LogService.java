@@ -1,8 +1,11 @@
 package com.ldjuric.saga.logs;
 
 
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 
+@Service
 public class LogService {
     private ArrayList<String> logs;
 
