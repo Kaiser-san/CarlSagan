@@ -1,18 +1,12 @@
 package com.ldjuric.saga.user;
 
+import com.ldjuric.saga.interfaces.UserServiceInterface;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserServiceInterface {
     private final UserRepository userRepository;
 
     public String getUser(String username) {
@@ -20,6 +14,7 @@ public class UserService {
         return user != null ? user.getName() : "";
     }
 
+    @Override
     public boolean validateUser(String username, String password) {
         UserEntity user = this.userRepository.findByUsername(username);
         return user != null ? user.getPassword() == password : false;

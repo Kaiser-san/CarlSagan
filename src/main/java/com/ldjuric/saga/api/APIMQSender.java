@@ -11,12 +11,12 @@ public class APIMQSender {
     private RabbitTemplate template;
 
     @Autowired
-    private Queue queue;
+    private Queue createQueue;
 
     @Scheduled(fixedDelay = 1000, initialDelay = 500)
     public void send() {
         String message = "Hello World!";
-        this.template.convertAndSend(queue.getName(), message);
+        this.template.convertAndSend(createQueue.getName(), message);
         System.out.println(" [x] Sent '" + message + "'");
     }
 }
