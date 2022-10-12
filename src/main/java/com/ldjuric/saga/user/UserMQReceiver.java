@@ -1,6 +1,6 @@
 package com.ldjuric.saga.user;
 
-import com.ldjuric.saga.logs.interfaces.UserServiceInterface;
+import com.ldjuric.saga.interfaces.UserServiceInterface;
 import org.json.JSONObject;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,15 +1,13 @@
-package com.ldjuric.saga.kitchen;
+package com.ldjuric.saga.warehouse;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.ldjuric.saga.order.OrderStatusEnum;
 import lombok.Data;
 
 import javax.persistence.*;
 
 @Entity
 @Data
-@Table(name = "kitchen")
-public class KitchenEntity {
+@Table(name = "warehouse")
+public class WarehouseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

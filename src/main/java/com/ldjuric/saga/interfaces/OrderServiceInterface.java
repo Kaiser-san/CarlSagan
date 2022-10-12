@@ -1,4 +1,4 @@
-package com.ldjuric.saga.logs.interfaces;
+package com.ldjuric.saga.interfaces;
 
 public interface OrderServiceInterface {
     String getOrder(Integer id);
@@ -7,5 +7,5 @@ public interface OrderServiceInterface {
 
     Integer choreographyCreate(Integer orderType, String username, String password);
 
-    void accountingValidatedChoreography(int orderID, String username, int kitchenAppointmentID, int cost, int accountingTransactionID, boolean validated);
+    void accountingValidatedChoreography(int orderID, String username, int warehouseReservationID, int cost, int accountingTransactionID, boolean validated);
 }

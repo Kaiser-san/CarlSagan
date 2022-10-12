@@ -1,6 +1,6 @@
 package com.ldjuric.saga.order;
 
-import com.ldjuric.saga.logs.interfaces.OrderServiceInterface;
+import com.ldjuric.saga.interfaces.OrderServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +35,7 @@ public class OrderService implements OrderServiceInterface {
     }
 
     @Override
-    public void accountingValidatedChoreography(int orderID, String username, int kitchenAppointmentID, int cost, int accountingTransactionID, boolean validated) {
+    public void accountingValidatedChoreography(int orderID, String username, int warehouseReservationID, int cost, int accountingTransactionID, boolean validated) {
         Optional<OrderEntity> orderEntity = orderRepository.findById(orderID);
         if (orderEntity.isEmpty()) {
             return;
@@ -47,9 +47,9 @@ public class OrderService implements OrderServiceInterface {
         }
 
         orderEntity.get().setUsername(username);
-        orderEntity.get().setKitchen_appointments_id(kitchenAppointmentID);
+        orderEntity.get().setWarehouseReservationID(warehouseReservationID);
         orderEntity.get().setCost(cost);
-        orderEntity.get().setAccounting_transactions_id(accountingTransactionID);
+        orderEntity.get().setAccountingTransactionID(accountingTransactionID);
         orderEntity.get().setStatus(OrderStatusEnum.FINALIZED);
         orderRepository.save(orderEntity.get());
     }

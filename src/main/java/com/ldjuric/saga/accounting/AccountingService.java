@@ -1,6 +1,6 @@
 package com.ldjuric.saga.accounting;
 
-import com.ldjuric.saga.logs.interfaces.AccountingServiceInterface;
+import com.ldjuric.saga.interfaces.AccountingServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +14,14 @@ public class AccountingService implements AccountingServiceInterface {
     private AccountingTransactionRepository accountingTransactionRepository;
 
     @Override
-    public Optional<AccountingTransactionEntity> createAndValidateOrderOrchestration(int orderID, int orderType, int kitchenAppointmentID, int cost, String username) {
+    public Optional<AccountingTransactionEntity> createAndValidateOrderOrchestration(int orderID, int orderType, int warehouseReservationID, int cost, String username) {
         Optional<AccountingTransactionEntity> transactionEntity = this.getOrCreateTransactionEntity(orderID);
         if (transactionEntity.isEmpty()) {
             return transactionEntity;
         }
 
         transactionEntity.get().setOrderType(orderType);
-        transactionEntity.get().setKitchenAppointmentID(orderType);
+        transactionEntity.get().setWarehouseReservationID(warehouseReservationID);
         transactionEntity.get().setCost(cost);
         
         Optional<AccountingEntity> accountingEntity = accountingRepository.findByUsername(username);
@@ -33,7 +33,7 @@ public class AccountingService implements AccountingServiceInterface {
             return transactionEntity;
         }
 
-        this.validateTransaction(transactionEntity.get());
+        transactionEntity.get().setStatus(this.validateTransaction(transactionEntity.get()));
         accountingTransactionRepository.save(transactionEntity.get());
 
         return transactionEntity;
@@ -48,20 +48,20 @@ public class AccountingService implements AccountingServiceInterface {
 
         transactionEntity.get().setOrderType(orderType);
 
-        this.validateTransaction(transactionEntity.get());
+        transactionEntity.get().setStatus(this.validateTransaction(transactionEntity.get()));
         accountingTransactionRepository.save(transactionEntity.get());
 
         return transactionEntity;
     }
 
     @Override
-    public Optional<AccountingTransactionEntity> createOrValidateKitchen(int orderID, int kitchenAppointmentID, int cost, boolean validated) {
+    public Optional<AccountingTransactionEntity> createOrValidateWarehouse(int orderID, int warehouseReservationID, int cost, boolean validated) {
         Optional<AccountingTransactionEntity> transactionEntity = this.getOrCreateTransactionEntity(orderID);
         if (transactionEntity.isEmpty()) {
             return transactionEntity;
         }
 
-        transactionEntity.get().setKitchenAppointmentID(kitchenAppointmentID);
+        transactionEntity.get().setWarehouseReservationID(warehouseReservationID);
         transactionEntity.get().setCost(cost);
 
         if (!validated) {
@@ -69,7 +69,7 @@ public class AccountingService implements AccountingServiceInterface {
             return transactionEntity;
         }
 
-        this.validateTransaction(transactionEntity.get());
+        transactionEntity.get().setStatus(this.validateTransaction(transactionEntity.get()));
         accountingTransactionRepository.save(transactionEntity.get());
 
         return transactionEntity;
@@ -96,7 +96,7 @@ public class AccountingService implements AccountingServiceInterface {
             return transactionEntity;
         }
 
-        this.validateTransaction(transactionEntity.get());
+        transactionEntity.get().setStatus(this.validateTransaction(transactionEntity.get()));
         accountingTransactionRepository.save(transactionEntity.get());
 
         return transactionEntity;
@@ -105,7 +105,7 @@ public class AccountingService implements AccountingServiceInterface {
     private AccountingTransactionStatusEnum validateTransaction(AccountingTransactionEntity accountingTransaction) {
         if (accountingTransaction.getOrderType() != 0
                 && accountingTransaction.getAccountingEntity() != null
-                && accountingTransaction.getKitchenAppointmentID() != 0
+                && accountingTransaction.getWarehouseReservationID() != 0
                 && accountingTransaction.getAccountingEntity().getCredit() > accountingTransaction.getCost()) {
             accountingTransaction.getAccountingEntity().setCredit(accountingTransaction.getAccountingEntity().getCredit() - accountingTransaction.getCost());
             return AccountingTransactionStatusEnum.FINALIZED;

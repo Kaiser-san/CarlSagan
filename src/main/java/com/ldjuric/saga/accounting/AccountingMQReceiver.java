@@ -1,6 +1,6 @@
 package com.ldjuric.saga.accounting;
 
-import com.ldjuric.saga.logs.interfaces.AccountingServiceInterface;
+import com.ldjuric.saga.interfaces.AccountingServiceInterface;
 import org.json.JSONObject;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +18,12 @@ public class AccountingMQReceiver {
     public void receiveCreateAppointmentOrchestration(String in) {
         System.out.println(" [accounting service] Received '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
-        int orderID = jsonObject.getInt("order_id");
-        int orderType = jsonObject.getInt("order_type");
-        int kitchenAppointmentID = jsonObject.getInt("kitchen_appointment_id");
+        int orderID = jsonObject.getInt("orderID");
+        int orderType = jsonObject.getInt("orderType");
+        int warehouseAppointmentID = jsonObject.getInt("warehouseReservationID");
         int cost = jsonObject.getInt("cost");
         String username = jsonObject.get("username").toString();
-        Optional<AccountingTransactionEntity> accountingTransaction = accountingService.createAndValidateOrderOrchestration(orderID, orderType, kitchenAppointmentID, cost, username);
+        Optional<AccountingTransactionEntity> accountingTransaction = accountingService.createAndValidateOrderOrchestration(orderID, orderType, warehouseAppointmentID, cost, username);
         sendResponseOrchestration(orderID, accountingTransaction);
     }
 
@@ -31,21 +31,21 @@ public class AccountingMQReceiver {
     public void receiveCreateAppointment(String in) {
         System.out.println(" [accounting service] Received '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
-        int orderID = jsonObject.getInt("order_id");
-        int orderType = jsonObject.getInt("order_type");
+        int orderID = jsonObject.getInt("orderID");
+        int orderType = jsonObject.getInt("orderType");
         Optional<AccountingTransactionEntity> accountingTransaction = accountingService.createOrValidateOrder(orderID, orderType);
         sendResponseChoreography(orderID, accountingTransaction);
     }
 
-    @RabbitListener(queues = "kitchen_output")
-    public void receiveKitchenOutput(String in) {
+    @RabbitListener(queues = "warehouse_output")
+    public void receiveWarehouseOutput(String in) {
         System.out.println(" [accounting service] Received '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
-        int orderID = jsonObject.getInt("order_id");
-        int kitchenAppointmentID = jsonObject.getInt("kitchen_appointment_id");
+        int orderID = jsonObject.getInt("orderID");
+        int warehouseAppointmentID = jsonObject.getInt("warehouseReservationID");
         int cost = jsonObject.getInt("cost");
         boolean validated = jsonObject.getBoolean("validated");
-        Optional<AccountingTransactionEntity> accountingTransaction = accountingService.createOrValidateKitchen(orderID, kitchenAppointmentID, cost, validated);
+        Optional<AccountingTransactionEntity> accountingTransaction = accountingService.createOrValidateWarehouse(orderID, warehouseAppointmentID, cost, validated);
         sendResponseChoreography(orderID, accountingTransaction);
     }
 
@@ -53,7 +53,7 @@ public class AccountingMQReceiver {
     public void receiveUserOutput(String in) {
         System.out.println(" [accounting service] Received '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
-        int orderID = jsonObject.getInt("order_id");
+        int orderID = jsonObject.getInt("orderID");
         String username = jsonObject.get("username").toString();
         boolean validated = jsonObject.getBoolean("validated");
         Optional<AccountingTransactionEntity> accountingTransaction = accountingService.createOrValidateUser(orderID, username, validated);

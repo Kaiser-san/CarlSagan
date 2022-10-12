@@ -1,4 +1,4 @@
-package com.ldjuric.saga.accounting;
+package com.ldjuric.saga.warehouse;
 
 import lombok.Data;
 
@@ -6,16 +6,15 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@Table(name = "accounting_transaction")
-public class AccountingTransactionEntity {
-
+@Table(name = "warehouse_reservations")
+public class WarehouseReservationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "accountingID")
-    private AccountingEntity accountingEntity;
+    @JoinColumn(name = "warehouseID")
+    private WarehouseEntity warehouse;
 
     @Column(name = "orderID")
     private Integer orderID;
@@ -23,13 +22,7 @@ public class AccountingTransactionEntity {
     @Column(name = "orderType")
     private Integer orderType;
 
-    @Column(name = "warehouseReservationID")
-    private Integer warehouseReservationID;
-
-    @Column(name = "cost")
-    private Integer cost;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private AccountingTransactionStatusEnum status;
+    private WarehouseReservationStatusEnum status;
 }

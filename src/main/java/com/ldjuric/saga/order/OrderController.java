@@ -1,6 +1,6 @@
 package com.ldjuric.saga.order;
 
-import com.ldjuric.saga.logs.interfaces.OrderServiceInterface;
+import com.ldjuric.saga.interfaces.OrderServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

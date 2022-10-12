@@ -14,7 +14,7 @@ public class OrderMQSender {
 
     public void sendChoreography(Integer orderID, Integer orderType, String username, String password) {
         JSONObject jsonMessage = new JSONObject();
-        jsonMessage.put("order_id", orderID);
+        jsonMessage.put("orderID", orderID);
         jsonMessage.put("orderType", orderType);
         jsonMessage.put("username", username);
         jsonMessage.put("password", password);

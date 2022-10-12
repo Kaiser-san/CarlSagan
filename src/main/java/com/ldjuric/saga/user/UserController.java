@@ -1,6 +1,6 @@
 package com.ldjuric.saga.user;
 
-import com.ldjuric.saga.logs.interfaces.UserServiceInterface;
+import com.ldjuric.saga.interfaces.UserServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

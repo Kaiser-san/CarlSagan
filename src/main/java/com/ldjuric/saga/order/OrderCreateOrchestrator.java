@@ -36,12 +36,12 @@ public class OrderCreateOrchestrator {
         orderEntity.get().setUsername(username);
         orderRepository.save(orderEntity.get());
 
-        if (this.validateUserAndKitchen(orderEntity.get())) {
+        if (this.validateUserAndWarehouse(orderEntity.get())) {
             orderSender.sendAccountingValidate(orderEntity.get());
         }
     }
 
-    public void kitchenValidated(int orderID, int kitchenAppointmentID, int cost, boolean validated) {
+    public void warehouseValidated(int orderID, int warehouseReservationID, int cost, boolean validated) {
         Optional<OrderEntity> orderEntity = orderRepository.findById(orderID);
         if (orderEntity.isEmpty()) {
             return;
@@ -52,11 +52,11 @@ public class OrderCreateOrchestrator {
             return;
         }
 
-        orderEntity.get().setKitchen_appointments_id(kitchenAppointmentID);
+        orderEntity.get().setWarehouseReservationID(warehouseReservationID);
         orderEntity.get().setCost(cost);
         orderRepository.save(orderEntity.get());
 
-        if (this.validateUserAndKitchen(orderEntity.get())) {
+        if (this.validateUserAndWarehouse(orderEntity.get())) {
             orderSender.sendAccountingValidate(orderEntity.get());
         }
     }
@@ -72,12 +72,12 @@ public class OrderCreateOrchestrator {
             return;
         }
 
-        orderEntity.get().setAccounting_transactions_id(accountingTransactionID);
+        orderEntity.get().setAccountingTransactionID(accountingTransactionID);
         orderEntity.get().setStatus(OrderStatusEnum.FINALIZED);
         orderRepository.save(orderEntity.get());
     }
 
-    private boolean validateUserAndKitchen(OrderEntity orderEntity) {
-        return !orderEntity.getUsername().isEmpty() && orderEntity.getKitchen_appointments_id() != 0;
+    private boolean validateUserAndWarehouse(OrderEntity orderEntity) {
+        return !orderEntity.getUsername().isEmpty() && orderEntity.getWarehouseReservationID() != 0;
     }
 }
