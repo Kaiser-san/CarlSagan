@@ -8,19 +8,15 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class UserMQConfig {
-    private static final String QUEUE_NAME_USER_IN = "user_input";
-
-    private static final String QUEUE_NAME_USER_OUT = "user_output";
-
 
     @Bean
     public Queue userInputQueue() {
-        return new Queue(QUEUE_NAME_USER_IN, true);
+        return new Queue("user_input", true);
     }
 
     @Bean
     public Queue userOutputQueue() {
-        return new Queue(QUEUE_NAME_USER_OUT, true);
+        return new Queue("user_output", true);
     }
 
     @Bean
