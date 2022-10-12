@@ -23,7 +23,7 @@ public class KitchenMQReceiver {
         int orderType = jsonObject.getInt("order_type");
         Optional<KitchenAppointmentEntity> kitchenAppointment = kitchenService.createAppointment(orderID, orderType);
         if (kitchenAppointment.isPresent()) {
-            kitchenSender.sendSuccess(orderID, kitchenAppointment.get().getKitchen().getName(), kitchenAppointment.get().getKitchen().getCost());
+            kitchenSender.sendSuccess(orderID, kitchenAppointment.get().getId(), kitchenAppointment.get().getKitchen().getCost());
         }
         else {
             kitchenSender.sendFailure(orderID);

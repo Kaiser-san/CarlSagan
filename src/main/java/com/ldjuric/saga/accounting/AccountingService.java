@@ -14,35 +14,63 @@ public class AccountingService implements AccountingServiceInterface {
     private AccountingTransactionRepository accountingTransactionRepository;
 
     @Override
+    public Optional<AccountingTransactionEntity> createAndValidateOrderOrchestration(int orderID, int orderType, int kitchenAppointmentID, int cost, String username) {
+        Optional<AccountingTransactionEntity> transactionEntity = this.getOrCreateTransactionEntity(orderID);
+        if (transactionEntity.isEmpty()) {
+            return transactionEntity;
+        }
+
+        transactionEntity.get().setOrderType(orderType);
+        transactionEntity.get().setKitchenAppointmentID(orderType);
+        transactionEntity.get().setCost(cost);
+        
+        Optional<AccountingEntity> accountingEntity = accountingRepository.findByUsername(username);
+        if (accountingEntity.isPresent()) {
+            transactionEntity.get().setAccountingEntity(accountingEntity.get());
+        }
+        else {
+            transactionEntity.get().setStatus(AccountingTransactionStatusEnum.REJECTED);
+            return transactionEntity;
+        }
+
+        this.validateTransaction(transactionEntity.get());
+        accountingTransactionRepository.save(transactionEntity.get());
+
+        return transactionEntity;
+    }
+
+    @Override
     public Optional<AccountingTransactionEntity> createOrValidateOrder(int orderID, int orderType) {
         Optional<AccountingTransactionEntity> transactionEntity = this.getOrCreateTransactionEntity(orderID);
         if (transactionEntity.isEmpty()) {
             return transactionEntity;
         }
 
+        transactionEntity.get().setOrderType(orderType);
+
         this.validateTransaction(transactionEntity.get());
+        accountingTransactionRepository.save(transactionEntity.get());
 
         return transactionEntity;
     }
 
     @Override
-    public Optional<AccountingTransactionEntity> createOrValidateKitchen(int orderID, int kitchenAppointmentID, boolean validated) {
+    public Optional<AccountingTransactionEntity> createOrValidateKitchen(int orderID, int kitchenAppointmentID, int cost, boolean validated) {
         Optional<AccountingTransactionEntity> transactionEntity = this.getOrCreateTransactionEntity(orderID);
         if (transactionEntity.isEmpty()) {
             return transactionEntity;
         }
 
         transactionEntity.get().setKitchenAppointmentID(kitchenAppointmentID);
+        transactionEntity.get().setCost(cost);
 
-        if (!validated)
-        {
+        if (!validated) {
             transactionEntity.get().setStatus(AccountingTransactionStatusEnum.REJECTED);
             return transactionEntity;
         }
 
-        transactionEntity.get().setKitchenAppointmentID(kitchenAppointmentID);
-
         this.validateTransaction(transactionEntity.get());
+        accountingTransactionRepository.save(transactionEntity.get());
 
         return transactionEntity;
     }
@@ -54,8 +82,7 @@ public class AccountingService implements AccountingServiceInterface {
             return transactionEntity;
         }
 
-        if (!validated)
-        {
+        if (!validated) {
             transactionEntity.get().setStatus(AccountingTransactionStatusEnum.REJECTED);
             return transactionEntity;
         }
@@ -70,6 +97,7 @@ public class AccountingService implements AccountingServiceInterface {
         }
 
         this.validateTransaction(transactionEntity.get());
+        accountingTransactionRepository.save(transactionEntity.get());
 
         return transactionEntity;
     }

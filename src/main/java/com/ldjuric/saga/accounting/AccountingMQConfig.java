@@ -10,6 +10,11 @@ public class AccountingMQConfig {
     }
 
     @Bean
+    public Queue accountingCreateOrchestrationQueue() {
+        return new Queue("accounting_create_orchestration", true);
+    }
+
+    @Bean
     public Queue accountingOutputQueue() {
         return new Queue("accounting_output", true);
     }
