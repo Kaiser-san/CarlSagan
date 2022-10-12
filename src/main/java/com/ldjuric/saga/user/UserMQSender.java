@@ -13,8 +13,12 @@ public class UserMQSender {
     @Autowired
     private Queue userOutputQueue;
 
-    public void send(boolean result) {
-        String message = new JSONObject().put("result", result).toString();
+    public void send(boolean result, int orderID, String username) {
+        JSONObject jsonMessage = new JSONObject();
+        jsonMessage.put("validated", result);
+        jsonMessage.put("order_id", orderID);
+        jsonMessage.put("username", username);
+        String message = jsonMessage.toString();
         this.template.convertAndSend(userOutputQueue.getName(), message);
         System.out.println(" [user service] Sent '" + message + "'");
     }

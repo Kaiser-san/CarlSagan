@@ -1,13 +1,10 @@
 package com.ldjuric.saga.user;
 
-import com.ldjuric.saga.interfaces.UserServiceInterface;
-import lombok.RequiredArgsConstructor;
+import com.ldjuric.saga.logs.interfaces.UserServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/user")

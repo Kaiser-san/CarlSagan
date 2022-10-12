@@ -10,25 +10,48 @@ public class AccountingMQSender {
     private RabbitTemplate template;
 
     @Autowired
-    private Queue accountingOutputQueue;
+    private Queue accountingOutputChoreographyQueue;
 
-    public void sendSuccess(Integer orderID, Integer accountingTransactionID) {
+    @Autowired
+    private Queue accountingOutputOrchestrationQueue;
+
+    public void sendSuccessChoreography(Integer orderID, AccountingTransactionEntity accountingTransaction) {
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("validated", true);
-        jsonMessage.put("orderID", orderID);
-        jsonMessage.put("accountingTransactionID", accountingTransactionID);
+        jsonMessage.put("order_id", orderID);
+        jsonMessage.put("accounting_transaction_id", accountingTransaction.getId());
+        jsonMessage.put("kitchen_appointment_id", accountingTransaction.getKitchenAppointmentID());
+        jsonMessage.put("cost", accountingTransaction.getCost());
         String message = jsonMessage.toString();
-        this.template.convertAndSend(accountingOutputQueue.getName(), message);
+        this.template.convertAndSend(accountingOutputChoreographyQueue.getName(), message);
         System.out.println(" [accounting service] Sent '" + message + "'");
     }
 
-    public void sendFailure(Integer orderID) {
+    public void sendFailureChoreography(Integer orderID) {
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("validated", false);
-        jsonMessage.put("orderID", orderID);
+        jsonMessage.put("order_id", orderID);
         String message = jsonMessage.toString();
-        this.template.convertAndSend(accountingOutputQueue.getName(), message);
+        this.template.convertAndSend(accountingOutputChoreographyQueue.getName(), message);
         System.out.println(" [accounting service] Sent '" + message + "'");
     }
 
+    public void sendSuccessOrchestration(int orderID, AccountingTransactionEntity accountingTransaction) {
+        JSONObject jsonMessage = new JSONObject();
+        jsonMessage.put("validated", true);
+        jsonMessage.put("order_id", orderID);
+        jsonMessage.put("accounting_transaction_id", accountingTransaction.getId());
+        String message = jsonMessage.toString();
+        this.template.convertAndSend(accountingOutputOrchestrationQueue.getName(), message);
+        System.out.println(" [accounting service] Sent '" + message + "'");
+    }
+
+    public void sendFailureOrchestration(int orderID) {
+        JSONObject jsonMessage = new JSONObject();
+        jsonMessage.put("validated", false);
+        jsonMessage.put("order_id", orderID);
+        String message = jsonMessage.toString();
+        this.template.convertAndSend(accountingOutputOrchestrationQueue.getName(), message);
+        System.out.println(" [accounting service] Sent '" + message + "'");
+    }
 }

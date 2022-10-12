@@ -38,9 +38,9 @@ CREATE TABLE accounting_transaction(
 CREATE TABLE order_table(
     id INT(8) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     order_type INT(8) NOT NULL,
-    username VARCHAR(100) NOT NULL,
-    password VARCHAR(100),
+    username VARCHAR(100),
     kitchen_appointments_id INT(8),
+    cost INT(8),
     accounting_transactions_id INT(8),
     status VARCHAR(100)
 );

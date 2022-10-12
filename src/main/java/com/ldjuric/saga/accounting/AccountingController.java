@@ -1,7 +1,6 @@
 package com.ldjuric.saga.accounting;
 
-import com.ldjuric.saga.interfaces.AccountingServiceInterface;
-import lombok.RequiredArgsConstructor;
+import com.ldjuric.saga.logs.interfaces.AccountingServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;

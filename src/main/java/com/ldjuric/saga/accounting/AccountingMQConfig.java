@@ -2,30 +2,31 @@ package com.ldjuric.saga.accounting;
 
 import org.springframework.amqp.core.Queue;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
+@Configuration
 public class AccountingMQConfig {
     @Bean
-    public Queue accountingCreateQueue() {
-        return new Queue("accounting_create", true);
+    public Queue accountingInputOrchestrationQueue() {
+        return new Queue("accounting_input_orchestration", true);
     }
 
     @Bean
-    public Queue accountingCreateOrchestrationQueue() {
-        return new Queue("accounting_create_orchestration", true);
+    public Queue accountingOutputChoreographyQueue() {
+        return new Queue("accounting_output_choreography", true);
+    }
+    @Bean
+    public Queue accountingOutputOrchestrationQueue() {
+        return new Queue("accounting_output_orchestration", true);
     }
 
     @Bean
-    public Queue accountingOutputQueue() {
-        return new Queue("accounting_output", true);
-    }
-
-    @Bean
-    public AccountingMQReceiver kitchenReceiver() {
+    public AccountingMQReceiver accountingReceiver() {
         return new AccountingMQReceiver();
     }
 
     @Bean
-    public AccountingMQSender kitchenSender() {
+    public AccountingMQSender accountingSender() {
         return new AccountingMQSender();
     }
 }

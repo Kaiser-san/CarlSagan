@@ -1,4 +1,4 @@
-package com.ldjuric.saga.interfaces;
+package com.ldjuric.saga.logs.interfaces;
 
 import com.ldjuric.saga.kitchen.KitchenAppointmentEntity;
 

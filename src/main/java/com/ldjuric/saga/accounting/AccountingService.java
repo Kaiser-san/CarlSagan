@@ -1,6 +1,6 @@
 package com.ldjuric.saga.accounting;
 
-import com.ldjuric.saga.interfaces.AccountingServiceInterface;
+import com.ldjuric.saga.logs.interfaces.AccountingServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

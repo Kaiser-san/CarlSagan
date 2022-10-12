@@ -1,8 +1,7 @@
 package com.ldjuric.saga.kitchen;
 
-import com.ldjuric.saga.interfaces.KitchenServiceInterface;
+import com.ldjuric.saga.logs.interfaces.KitchenServiceInterface;
 import org.json.JSONObject;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,7 +14,7 @@ public class KitchenMQReceiver {
     @Autowired
     private KitchenMQSender kitchenSender;
 
-    @RabbitListener(queues = "kitchen_create_appointment")
+    @RabbitListener(queues = {"kitchen_input", "order_output"})
     public void receiveCreateAppointment(String in) {
         System.out.println(" [kitchen service] Received '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);

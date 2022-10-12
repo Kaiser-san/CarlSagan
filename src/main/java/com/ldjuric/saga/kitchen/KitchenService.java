@@ -1,7 +1,6 @@
 package com.ldjuric.saga.kitchen;
 
-import com.ldjuric.saga.interfaces.KitchenServiceInterface;
-import lombok.RequiredArgsConstructor;
+import com.ldjuric.saga.logs.interfaces.KitchenServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -15,8 +15,8 @@ public class KitchenMQSender {
     public void sendSuccess(Integer orderID, Integer kitchenAppointmentID, Integer cost) {
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("validated", true);
-        jsonMessage.put("orderID", orderID);
-        jsonMessage.put("kitchenAppointmentID", kitchenAppointmentID);
+        jsonMessage.put("order_id", orderID);
+        jsonMessage.put("kitchen_appointment_id", kitchenAppointmentID);
         jsonMessage.put("cost", cost);
         String message = jsonMessage.toString();
         this.template.convertAndSend(kitchenOutputQueue.getName(), message);
@@ -26,7 +26,7 @@ public class KitchenMQSender {
     public void sendFailure(Integer orderID) {
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("validated", false);
-        jsonMessage.put("orderID", orderID);
+        jsonMessage.put("order_id", orderID);
         String message = jsonMessage.toString();
         this.template.convertAndSend(kitchenOutputQueue.getName(), message);
         System.out.println(" [kitchen service] Sent '" + message + "'");

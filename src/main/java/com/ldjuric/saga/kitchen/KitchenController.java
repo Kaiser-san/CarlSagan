@@ -1,7 +1,6 @@
 package com.ldjuric.saga.kitchen;
 
-import com.ldjuric.saga.interfaces.KitchenServiceInterface;
-import lombok.RequiredArgsConstructor;
+import com.ldjuric.saga.logs.interfaces.KitchenServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
