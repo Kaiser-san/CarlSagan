@@ -1,16 +1,18 @@
 package com.ldjuric.saga.kitchen;
 
+import com.ldjuric.saga.interfaces.KitchenServiceInterface;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/user")
 @CrossOrigin(origins="*", maxAge=3600)
 public class KitchenController {
-    private final KitchenService kitchenService;
+    @Autowired
+    private KitchenServiceInterface kitchenService;
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getKitchenName(@PathVariable("id") Integer id) {

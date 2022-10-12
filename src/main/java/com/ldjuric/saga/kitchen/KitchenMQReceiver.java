@@ -1,0 +1,41 @@
+package com.ldjuric.saga.kitchen;
+
+import com.ldjuric.saga.interfaces.KitchenServiceInterface;
+import org.json.JSONObject;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Optional;
+
+public class KitchenMQReceiver {
+    @Autowired
+    private KitchenServiceInterface kitchenService;
+
+    @Autowired
+    private KitchenMQSender kitchenSender;
+
+    @RabbitListener(queues = "kitchen_create_appointment")
+    public void receiveCreateAppointment(String in) {
+        System.out.println(" [kitchen service] Received '" + in + "'");
+        JSONObject jsonObject = new JSONObject(in);
+        int orderID = jsonObject.getInt("order_id");
+        int orderType = jsonObject.getInt("order_type");
+        Optional<KitchenAppointmentEntity> kitchenAppointment = kitchenService.createAppointment(orderID, orderType);
+        if (kitchenAppointment.isPresent()) {
+            kitchenSender.sendSucess(orderID, kitchenAppointment.get().getKitchen().getName(), kitchenAppointment.get().getKitchen().getCost());
+        }
+        else {
+            kitchenSender.sendFailure(orderID);
+        }
+    }
+
+    @RabbitListener(queues = "kitchen_validate_appointment")
+    public void receiveValidateAppointment(String in) {
+        System.out.println(" [kitchen service] Received '" + in + "'");
+        JSONObject jsonObject = new JSONObject(in);
+        int orderID = jsonObject.getInt("order_id");
+        boolean validated = jsonObject.getBoolean("validated");
+        kitchenService.validateAppointment(orderID, validated);
+    }
+}
