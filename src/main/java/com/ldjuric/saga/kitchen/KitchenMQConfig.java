@@ -6,20 +6,18 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class KitchenMQConfig {
-    private static final String KITCHEN_NAME_KITCHEN_CREATE_APPOINTMENT = "kitchen_create_appointment";
-    private static final String KITCHEN_NAME_KITCHEN_VALIDATE_APPOINTMENT = "kitchen_validate_appointment";
-
+    private static final String QUEUE_NAME_KITCHEN_CREATE_APPOINTMENT = "kitchen_create_appointment";
+    private static final String QUEUE_NAME_KITCHEN_VALIDATE_APPOINTMENT = "kitchen_validate_appointment";
     private static final String QUEUE_NAME_KITCHEN_OUT = "kitchen_output";
-
 
     @Bean
     public Queue kitchenCreateQueue() {
-        return new Queue(KITCHEN_NAME_KITCHEN_CREATE_APPOINTMENT, true);
+        return new Queue(QUEUE_NAME_KITCHEN_CREATE_APPOINTMENT, true);
     }
 
     @Bean
     public Queue kitchenValidateQueue() {
-        return new Queue(KITCHEN_NAME_KITCHEN_VALIDATE_APPOINTMENT, true);
+        return new Queue(QUEUE_NAME_KITCHEN_VALIDATE_APPOINTMENT, true);
     }
 
     @Bean

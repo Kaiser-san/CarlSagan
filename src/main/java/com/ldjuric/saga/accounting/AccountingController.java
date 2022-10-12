@@ -1,15 +1,16 @@
 package com.ldjuric.saga.accounting;
 
+import com.ldjuric.saga.interfaces.AccountingServiceInterface;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/accounting")
 @CrossOrigin(origins="*", maxAge=3600)
 public class AccountingController {
-
-    private final AccountingService accountingService;
+    @Autowired
+    private AccountingServiceInterface accountingService;
 }

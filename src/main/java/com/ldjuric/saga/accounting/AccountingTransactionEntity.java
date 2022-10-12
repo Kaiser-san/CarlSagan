@@ -21,14 +21,14 @@ public class AccountingTransactionEntity {
     @Column(name = "order_id")
     private Integer orderID;
 
-    @Column(name = "username")
-    private String username;
+    @Column(name = "order_type")
+    private Integer orderType;
 
     @Column(name = "kitchen_appointment_id")
     private Integer kitchenAppointmentID;
 
-    @Column(name = "order_type")
-    private Integer orderType;
+    @Column(name = "cost")
+    private Integer cost;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")

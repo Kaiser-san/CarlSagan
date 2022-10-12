@@ -23,14 +23,14 @@ public class KitchenMQReceiver {
         int orderType = jsonObject.getInt("order_type");
         Optional<KitchenAppointmentEntity> kitchenAppointment = kitchenService.createAppointment(orderID, orderType);
         if (kitchenAppointment.isPresent()) {
-            kitchenSender.sendSucess(orderID, kitchenAppointment.get().getKitchen().getName(), kitchenAppointment.get().getKitchen().getCost());
+            kitchenSender.sendSuccess(orderID, kitchenAppointment.get().getKitchen().getName(), kitchenAppointment.get().getKitchen().getCost());
         }
         else {
             kitchenSender.sendFailure(orderID);
         }
     }
 
-    @RabbitListener(queues = "kitchen_validate_appointment")
+    @RabbitListener(queues = "accounting_output")
     public void receiveValidateAppointment(String in) {
         System.out.println(" [kitchen service] Received '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
