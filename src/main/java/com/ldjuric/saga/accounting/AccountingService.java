@@ -19,41 +19,48 @@ public class AccountingService implements AccountingServiceInterface {
     @Autowired
     private AccountingTransactionVersionFileRepository accountingTransactionVersionFileRepository;
 
+    @Autowired
+    private AccountingMQSender sender;
+
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public Optional<AccountingTransactionEntity> createAndValidateOrderOrchestration(int orderID, int orderType, int warehouseReservationID, int cost, String username) {
-        Optional<AccountingTransactionEntity> transactionEntity = this.getOrCreateTransactionEntity(orderID);
-        if (transactionEntity.isEmpty()) {
-            return Optional.empty();
-        }
+        sender.log("[AccountingService::createAndValidateOrderOrchestration] start");
+        AccountingTransactionEntity transactionEntity = new AccountingTransactionEntity();
+        transactionEntity.setOrderID(orderID);
+        transactionEntity.setOrderType(orderType);
+        transactionEntity.setWarehouseReservationID(warehouseReservationID);
+        transactionEntity.setCost(cost);
 
-        transactionEntity.get().setOrderType(orderType);
-        transactionEntity.get().setWarehouseReservationID(warehouseReservationID);
-        transactionEntity.get().setCost(cost);
-        
         Optional<AccountingEntity> accountingEntity = accountingRepository.findByUsername(username);
         if (accountingEntity.isPresent()) {
-            transactionEntity.get().setAccountingEntity(accountingEntity.get());
+            sender.log("[AccountingService::createAndValidateOrderOrchestration] enough credit; orderID:" + orderID);
+            transactionEntity.setAccountingEntity(accountingEntity.get());
         }
         else {
+            sender.log("[AccountingService::createAndValidateOrderOrchestration] not enough credit; orderID:" + orderID);
             return Optional.empty();
         }
 
-        accountingTransactionRepository.save(transactionEntity.get());
+        accountingTransactionRepository.save(transactionEntity);
+        sender.log("[AccountingService::createAndValidateOrderOrchestration] saved transaction; orderID:" + orderID);
 
-        return transactionEntity;
+        return Optional.of(transactionEntity);
     }
 
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public AccountingTransactionStatusEnum createOrValidateOrder(int orderID, int orderType) {
+        sender.log("[AccountingService::createOrValidateOrder] start");
         Optional<AccountingTransactionVersionFileEntity> transactionVersionEntity = this.getOrCreateTransactionEntityVersionFile(orderID);
         if (transactionVersionEntity.isEmpty()) {
+            sender.log("[AccountingService::createOrValidateOrder] already rejected; orderID:" + orderID);
             return AccountingTransactionStatusEnum.INITIALIZING;
         }
 
         transactionVersionEntity.get().setOrderType(orderType);
         accountingTransactionVersionFileRepository.save(transactionVersionEntity.get());
+        sender.log("[AccountingService::createOrValidateOrder] saved version file; orderID:" + orderID);
 
         return this.validateTransaction(orderID);
     }
@@ -61,16 +68,20 @@ public class AccountingService implements AccountingServiceInterface {
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public AccountingTransactionStatusEnum createOrValidateWarehouse(int orderID, int warehouseReservationID, int cost, boolean validated) {
+        sender.log("[AccountingService::createOrValidateOrder] start; orderID:" + orderID);
         Optional<AccountingTransactionVersionFileEntity> transactionVersionEntity = this.getOrCreateTransactionEntityVersionFile(orderID);
         if (transactionVersionEntity.isEmpty()) {
+            sender.log("[AccountingService::createOrValidateOrder] already rejected; orderID:" + orderID);
             return AccountingTransactionStatusEnum.INITIALIZING;
         }
 
         transactionVersionEntity.get().setWarehouseReservationID(warehouseReservationID);
         transactionVersionEntity.get().setCost(cost);
         accountingTransactionVersionFileRepository.save(transactionVersionEntity.get());
+        sender.log("[AccountingService::createOrValidateOrder] saved version file; orderID:" + orderID);
 
         if (!validated) {
+            sender.log("[AccountingService::createOrValidateOrder] invalid warehouse reservation, rejecting; orderID:" + orderID);
             return AccountingTransactionStatusEnum.REJECTED;
         }
 
@@ -80,23 +91,35 @@ public class AccountingService implements AccountingServiceInterface {
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public AccountingTransactionStatusEnum createOrValidateUser(int orderID, String username, boolean validated) {
+        sender.log("[AccountingService::createOrValidateOrder] start; orderID:" + orderID);
         Optional<AccountingTransactionVersionFileEntity> transactionVersionEntity = this.getOrCreateTransactionEntityVersionFile(orderID);
         if (transactionVersionEntity.isEmpty()) {
+            sender.log("[AccountingService::createOrValidateOrder] already rejected; orderID:" + orderID);
             return AccountingTransactionStatusEnum.INITIALIZING;
         }
 
         if (!validated) {
+            sender.log("[AccountingService::createOrValidateOrder] user invalid, reject; orderID:" + orderID);
+            transactionVersionEntity.get().setStatus(AccountingTransactionStatusEnum.REJECTED);
+            accountingTransactionVersionFileRepository.save(transactionVersionEntity.get());
+            sender.log("[AccountingService::createOrValidateOrder] saved version file; orderID:" + orderID);
             return AccountingTransactionStatusEnum.REJECTED;
         }
 
         Optional<AccountingEntity> accountingEntity = accountingRepository.findByUsername(username);
         if (accountingEntity.isPresent()) {
+            sender.log("[AccountingService::createOrValidateOrder] user account found; orderID:" + orderID);
             transactionVersionEntity.get().setAccountingEntity(accountingEntity.get());
+            accountingTransactionVersionFileRepository.save(transactionVersionEntity.get());
+            sender.log("[AccountingService::createOrValidateOrder] saved version file; orderID:" + orderID);
         }
         else {
+            sender.log("[AccountingService::createOrValidateOrder] no user account found, reject; orderID:" + orderID);
+            transactionVersionEntity.get().setStatus(AccountingTransactionStatusEnum.REJECTED);
+            accountingTransactionVersionFileRepository.save(transactionVersionEntity.get());
+            sender.log("[AccountingService::createOrValidateOrder] saved version file; orderID:" + orderID);
             return AccountingTransactionStatusEnum.REJECTED;
         }
-        accountingTransactionVersionFileRepository.save(transactionVersionEntity.get());
 
         return this.validateTransaction(orderID);
     }
@@ -108,6 +131,7 @@ public class AccountingService implements AccountingServiceInterface {
     }
 
     private AccountingTransactionStatusEnum validateTransaction(int orderID) {
+        sender.log("[AccountingService::validateTransaction] start; orderID:" + orderID);
         List<AccountingTransactionVersionFileEntity> versionFileEntities = accountingTransactionVersionFileRepository.findAllByOrderID(orderID);
         Integer orderType = null;
         AccountingEntity accountingEntity = null;
@@ -115,11 +139,12 @@ public class AccountingService implements AccountingServiceInterface {
         Integer cost = null;
 
         for (AccountingTransactionVersionFileEntity versionFileEntity : versionFileEntities) {
-            System.out.println("VersionFileEntity: " + versionFileEntity.toString());
             if (versionFileEntity.getStatus() == AccountingTransactionStatusEnum.REJECTED) {
-                return AccountingTransactionStatusEnum.REJECTED;
+                sender.log("[AccountingService::validateTransaction] already rejected, don't send; orderID:" + orderID);
+                return AccountingTransactionStatusEnum.INITIALIZING;
             }
             if (versionFileEntity.getStatus() == AccountingTransactionStatusEnum.FINALIZED) {
+                sender.log("[AccountingService::validateTransaction] already finalized, don't send; orderID:" + orderID);
                 return AccountingTransactionStatusEnum.INITIALIZING;
             }
 
@@ -140,25 +165,30 @@ public class AccountingService implements AccountingServiceInterface {
         if (orderType != null
                 && accountingEntity != null
                 && warehouseReservationID != null
-                && cost != null
-                && accountingEntity.getCredit() > cost) {
+                && cost != null) {
+
+            if (accountingEntity.getCredit() < cost) {
+                sender.log("[AccountingService::validateTransaction] not enough money, reject; orderID:" + orderID);
+
+                for (AccountingTransactionVersionFileEntity versionFileEntity : versionFileEntities) {
+                    versionFileEntity.setStatus(AccountingTransactionStatusEnum.REJECTED);
+                }
+                accountingTransactionVersionFileRepository.saveAll(versionFileEntities);
+                sender.log("[AccountingService::createOrValidateOrder] saved version files; orderID:" + orderID);
+
+                return AccountingTransactionStatusEnum.REJECTED;
+            }
 
             for (AccountingTransactionVersionFileEntity versionFileEntity : versionFileEntities) {
-                //checking again to make sure something didn't change in the meantime
-                if (versionFileEntity.getStatus() == AccountingTransactionStatusEnum.REJECTED) {
-                    return AccountingTransactionStatusEnum.REJECTED;
-                }
-                if (versionFileEntity.getStatus() == AccountingTransactionStatusEnum.FINALIZED) {
-                    return AccountingTransactionStatusEnum.INITIALIZING;
-                }
-
                 versionFileEntity.setStatus(AccountingTransactionStatusEnum.FINALIZED);
             }
 
             accountingTransactionVersionFileRepository.saveAll(versionFileEntities);
+            sender.log("[AccountingService::createOrValidateOrder] saved version files; orderID:" + orderID);
 
             accountingEntity.setCredit(accountingEntity.getCredit() - cost);
             accountingRepository.save(accountingEntity);
+            sender.log("[AccountingService::createOrValidateOrder] saved accounting; orderID:" + orderID);
 
             AccountingTransactionEntity transactionEntity = new AccountingTransactionEntity();
             transactionEntity.setOrderID(orderID);
@@ -167,22 +197,11 @@ public class AccountingService implements AccountingServiceInterface {
             transactionEntity.setCost(cost);
             transactionEntity.setAccountingEntity(accountingEntity);
             accountingTransactionRepository.save(transactionEntity);
+            sender.log("[AccountingService::createOrValidateOrder] saved transaction; orderID:" + orderID);
 
             return AccountingTransactionStatusEnum.FINALIZED;
         }
         return AccountingTransactionStatusEnum.INITIALIZING;
-    }
-
-    private Optional<AccountingTransactionEntity> getOrCreateTransactionEntity(int orderID) {
-        Optional<AccountingTransactionEntity> existingTransactionEntity = accountingTransactionRepository.findByOrderID(orderID);
-        //if already added, this means another process finished validating and sent response, so return null so we don't send another one
-        if (existingTransactionEntity.isPresent()) {
-            return Optional.empty();
-        }
-
-        AccountingTransactionEntity transactionEntity = new AccountingTransactionEntity();
-        transactionEntity.setOrderID(orderID);
-        return Optional.of(transactionEntity);
     }
 
     private Optional<AccountingTransactionVersionFileEntity> getOrCreateTransactionEntityVersionFile(int orderID) {

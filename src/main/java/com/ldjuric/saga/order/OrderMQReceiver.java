@@ -1,5 +1,6 @@
 package com.ldjuric.saga.order;
 
+import com.ldjuric.saga.accounting.AccountingMQSender;
 import com.ldjuric.saga.interfaces.OrderServiceInterface;
 import org.json.JSONObject;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -12,9 +13,12 @@ public class OrderMQReceiver {
     @Autowired
     private OrderCreateOrchestrator orderCreateOrchestrator;
 
+    @Autowired
+    private OrderMQSender sender;
+
     @RabbitListener(queues = "#{orderAccountingOutputQueue.name}")
     public void receiveAccountingOutputChoreography(String in) {
-        System.out.println(" [order service] Received '" + in + "'");
+        sender.log("[OrderService::receiveAccountingOutputChoreography] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         String username = jsonObject.optString("username");
@@ -27,7 +31,7 @@ public class OrderMQReceiver {
 
     @RabbitListener(queues = "user_output_orchestration")
     public void receiveUserOutput(String in) {
-        System.out.println(" [order service] Received '" + in + "'");
+        sender.log("[OrderService::receiveUserOutput] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         String username = jsonObject.optString("username");
@@ -37,7 +41,7 @@ public class OrderMQReceiver {
 
     @RabbitListener(queues = "warehouse_output_orchestration")
     public void receiveWarehouseOutput(String in) {
-        System.out.println(" [order service] Received '" + in + "'");
+        sender.log("[OrderService::receiveWarehouseOutput] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         int warehouseReservationID = jsonObject.optInt("warehouseReservationID");
@@ -48,7 +52,7 @@ public class OrderMQReceiver {
 
     @RabbitListener(queues = "accounting_output_orchestration")
     public void receiveAccountingOutputOrchestration(String in) {
-        System.out.println(" [order service] Received '" + in + "'");
+        sender.log("[OrderService::receiveAccountingOutputOrchestration] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         int accountingTransactionID = jsonObject.optInt("accountingTransactionID");

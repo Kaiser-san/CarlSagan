@@ -7,10 +7,9 @@ public class LogMQReceiver {
     @Autowired
     private LogService logService;
 
-
     @RabbitListener(queues = "log_input")
     public void receive(String in) {
-        System.out.println(" [log service] Received '" + in + "'");
+        System.out.println("Log " + in);
         logService.addLog(in);
     }
 

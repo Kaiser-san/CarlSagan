@@ -1,11 +1,12 @@
 package com.ldjuric.saga.warehouse;
 
+import com.ldjuric.saga.interfaces.LogServiceInterface;
 import org.json.JSONObject;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class WarehouseMQSender {
+public class WarehouseMQSender implements LogServiceInterface {
     @Autowired
     private RabbitTemplate template;
 
@@ -15,6 +16,9 @@ public class WarehouseMQSender {
     @Autowired
     private Queue warehouseOutputChoreographyQueue;
 
+    @Autowired
+    private Queue logInputQueue;
+
     public void sendSuccessOrchestration(int orderID, Integer warehouseReservationID, Integer cost) {
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("validated", true);
@@ -23,7 +27,7 @@ public class WarehouseMQSender {
         jsonMessage.put("cost", cost);
         String message = jsonMessage.toString();
         this.template.convertAndSend(warehouseOutputOrchestrationQueue.getName(), message);
-        System.out.println(" [warehouse service] Sent '" + message + "'");
+        this.log("[WarehouseService::sendSuccessOrchestration] sent " + message);
     }
 
     public void sendFailureOrchestration(int orderID) {
@@ -32,7 +36,7 @@ public class WarehouseMQSender {
         jsonMessage.put("orderID", orderID);
         String message = jsonMessage.toString();
         this.template.convertAndSend(warehouseOutputOrchestrationQueue.getName(), message);
-        System.out.println(" [warehouse service] Sent '" + message + "'");
+        this.log("[WarehouseService::sendFailureOrchestration] sent " + message);
     }
 
     public void sendSuccessChoreography(int orderID, Integer warehouseReservationID, Integer cost) {
@@ -43,7 +47,7 @@ public class WarehouseMQSender {
         jsonMessage.put("cost", cost);
         String message = jsonMessage.toString();
         this.template.convertAndSend(warehouseOutputChoreographyQueue.getName(), message);
-        System.out.println(" [warehouse service] Sent '" + message + "'");
+        this.log("[WarehouseService::sendSuccessChoreography] sent " + message);
     }
 
     public void sendFailureChoreography(int orderID) {
@@ -52,6 +56,11 @@ public class WarehouseMQSender {
         jsonMessage.put("orderID", orderID);
         String message = jsonMessage.toString();
         this.template.convertAndSend(warehouseOutputChoreographyQueue.getName(), message);
-        System.out.println(" [warehouse service] Sent '" + message + "'");
+        this.log("[WarehouseService::sendFailureChoreography] sent " + message);
+    }
+
+    @Override
+    public void log(String message) {
+        this.template.convertAndSend(logInputQueue.getName(), message);
     }
 }

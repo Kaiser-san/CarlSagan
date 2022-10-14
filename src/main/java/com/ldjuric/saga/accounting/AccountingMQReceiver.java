@@ -12,11 +12,11 @@ public class AccountingMQReceiver {
     private AccountingServiceInterface accountingService;
 
     @Autowired
-    private AccountingMQSender accountingSender;
+    private AccountingMQSender sender;
 
     @RabbitListener(queues = "accounting_input_orchestration")
     public void receiveCreateAppointmentOrchestration(String in) {
-        System.out.println(" [accounting service] Received receiveCreateAppointmentOrchestration start '" + in + "'");
+        sender.log("[AccountingService::receiveCreateAppointmentOrchestration] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         int orderType = jsonObject.getInt("orderType");
@@ -25,23 +25,21 @@ public class AccountingMQReceiver {
         String username = jsonObject.getString("username");
         Optional<AccountingTransactionEntity> accountingTransaction = accountingService.createAndValidateOrderOrchestration(orderID, orderType, warehouseAppointmentID, cost, username);
         sendResponseOrchestration(orderID, accountingTransaction);
-        System.out.println(" [accounting service] Received receiveCreateAppointmentOrchestration end '" + in + "'");
     }
 
     @RabbitListener(queues = "#{accountingOrderOutputQueue.name}")
     public void receiveCreateAppointment(String in) {
-        System.out.println(" [accounting service] Received receiveCreateAppointment start '" + in + "'");
+        sender.log("[AccountingService::receiveCreateAppointment] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         int orderType = jsonObject.getInt("orderType");
         AccountingTransactionStatusEnum status = accountingService.createOrValidateOrder(orderID, orderType);
         sendResponseChoreography(orderID, status);
-        System.out.println(" [accounting service] Received receiveCreateAppointment end'" + in + "'");
     }
 
     @RabbitListener(queues = "warehouse_output_choreography")
     public void receiveWarehouseOutput(String in) {
-        System.out.println(" [accounting service] Received receiveWarehouseOutput start'" + in + "'");
+        sender.log("[AccountingService::receiveWarehouseOutput] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         int warehouseAppointmentID = jsonObject.optInt("warehouseReservationID");
@@ -49,36 +47,34 @@ public class AccountingMQReceiver {
         boolean validated = jsonObject.getBoolean("validated");
         AccountingTransactionStatusEnum status = accountingService.createOrValidateWarehouse(orderID, warehouseAppointmentID, cost, validated);
         sendResponseChoreography(orderID, status);
-        System.out.println(" [accounting service] Received receiveWarehouseOutput end'" + in + "'");
     }
 
     @RabbitListener(queues = "user_output_choreography")
     public void receiveUserOutput(String in) {
-        System.out.println(" [accounting service] Received receiveUserOutput start'" + in + "'");
+        sender.log("[AccountingService::receiveUserOutput] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         String username = jsonObject.optString("username");
         boolean validated = jsonObject.getBoolean("validated");
         AccountingTransactionStatusEnum status = accountingService.createOrValidateUser(orderID, username, validated);
         sendResponseChoreography(orderID, status);
-        System.out.println(" [accounting service] Received receiveUserOutput end'" + in + "'");
     }
 
     private void sendResponseChoreography(int orderID, AccountingTransactionStatusEnum status) {
         if (status == AccountingTransactionStatusEnum.REJECTED) {
-            accountingSender.sendFailureChoreography(orderID);
+            sender.sendFailureChoreography(orderID);
         }
         else if (status == AccountingTransactionStatusEnum.FINALIZED) {
-            accountingSender.sendSuccessChoreography(orderID, accountingService.getTransaction(orderID));
+            sender.sendSuccessChoreography(orderID, accountingService.getTransaction(orderID));
         }
     }
 
     private void sendResponseOrchestration(int orderID, Optional<AccountingTransactionEntity> accountingTransaction) {
         if (accountingTransaction.isPresent()) {
-            accountingSender.sendSuccessOrchestration(orderID, accountingTransaction.get());
+            sender.sendSuccessOrchestration(orderID, accountingTransaction.get());
         }
         else {
-            accountingSender.sendFailureOrchestration(orderID);
+            sender.sendFailureOrchestration(orderID);
         }
     }
 }

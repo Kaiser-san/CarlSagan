@@ -12,43 +12,43 @@ public class WarehouseMQReceiver {
     private WarehouseServiceInterface warehouseService;
 
     @Autowired
-    private WarehouseMQSender warehouseSender;
+    private WarehouseMQSender sender;
 
     @RabbitListener(queues = "warehouse_input")
     public void receiveCreateReservationOrchestration(String in) {
-        System.out.println(" [warehouse service] Received '" + in + "'");
+        sender.log("[WarehouseService::receiveCreateReservationOrchestration] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         int orderType = jsonObject.getInt("orderType");
         WarehouseReservationStatusEnum status = warehouseService.createReservation(orderID, orderType);
         if (status == WarehouseReservationStatusEnum.FINALIZED) {
             WarehouseReservationEntity reservation = warehouseService.getWarehouseReservation(orderID);
-            warehouseSender.sendSuccessOrchestration(orderID, reservation.getId(), reservation.getWarehouse().getCost());
+            sender.sendSuccessOrchestration(orderID, reservation.getId(), reservation.getWarehouse().getCost());
         }
         else if (status == WarehouseReservationStatusEnum.REJECTED){
-            warehouseSender.sendFailureOrchestration(orderID);
+            sender.sendFailureOrchestration(orderID);
         }
     }
 
     @RabbitListener(queues = "#{warehouseOrderOutputQueue.name}")
     public void receiveCreateReservationChoreography(String in) {
-        System.out.println(" [warehouse service] Received '" + in + "'");
+        sender.log("[WarehouseService::receiveCreateReservationChoreography] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         int orderType = jsonObject.getInt("orderType");
         WarehouseReservationStatusEnum status = warehouseService.createReservation(orderID, orderType);
         if (status == WarehouseReservationStatusEnum.FINALIZED) {
             WarehouseReservationEntity reservation = warehouseService.getWarehouseReservation(orderID);
-            warehouseSender.sendSuccessChoreography(orderID, reservation.getId(), reservation.getWarehouse().getCost());
+            sender.sendSuccessChoreography(orderID, reservation.getId(), reservation.getWarehouse().getCost());
         }
         else if (status == WarehouseReservationStatusEnum.REJECTED){
-            warehouseSender.sendFailureChoreography(orderID);
+            sender.sendFailureChoreography(orderID);
         }
     }
 
     @RabbitListener(queues = "#{warehouseAccountingOutputQueue.name}")
     public void receiveValidateAppointment(String in) {
-        System.out.println(" [warehouse service] Received '" + in + "'");
+        sender.log("[WarehouseService::receiveValidateAppointment] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         boolean validated = jsonObject.getBoolean("validated");
