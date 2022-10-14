@@ -13,7 +13,7 @@ public class AccountingTransactionVersionFileEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "accounting_id")
     private AccountingEntity accountingEntity;
 

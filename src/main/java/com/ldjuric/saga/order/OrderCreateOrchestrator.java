@@ -78,6 +78,6 @@ public class OrderCreateOrchestrator {
     }
 
     private boolean validateUserAndWarehouse(OrderEntity orderEntity) {
-        return !orderEntity.getUsername().isEmpty() && orderEntity.getWarehouseReservationID() != 0;
+        return orderEntity.getUsername() != null && !orderEntity.getUsername().isEmpty() && orderEntity.getWarehouseReservationID() != null;
     }
 }

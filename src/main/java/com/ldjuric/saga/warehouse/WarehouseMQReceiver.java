@@ -23,10 +23,10 @@ public class WarehouseMQReceiver {
         WarehouseReservationStatusEnum status = warehouseService.createReservation(orderID, orderType);
         if (status == WarehouseReservationStatusEnum.FINALIZED) {
             WarehouseReservationEntity reservation = warehouseService.getWarehouseReservation(orderID);
-            warehouseSender.sendSuccessChoreography(orderID, reservation.getId(), reservation.getWarehouse().getCost());
+            warehouseSender.sendSuccessOrchestration(orderID, reservation.getId(), reservation.getWarehouse().getCost());
         }
         else if (status == WarehouseReservationStatusEnum.REJECTED){
-            warehouseSender.sendFailureChoreography(orderID);
+            warehouseSender.sendFailureOrchestration(orderID);
         }
     }
 

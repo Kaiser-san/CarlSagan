@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class WarehouseMQConfig {
     @Bean
-    public Queue warehouseCreateQueue() {
+    public Queue warehouseInputQueue() {
         return new Queue("warehouse_input", true);
     }
 

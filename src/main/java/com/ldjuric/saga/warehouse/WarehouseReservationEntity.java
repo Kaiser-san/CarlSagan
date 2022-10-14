@@ -12,7 +12,7 @@ public class WarehouseReservationEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "warehouse_id")
     private WarehouseEntity warehouse;
 
