@@ -3,6 +3,7 @@ package com.ldjuric.saga.order;
 import com.ldjuric.saga.interfaces.OrderServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -21,10 +22,12 @@ public class OrderService implements OrderServiceInterface {
         return order.isPresent() ? order.get().toString() : "";
     }
 
+    @Transactional
     public void orchestrationCreate(Integer orderType, String username, String password) {
         orderCreateOrchestrator.startOrchestration(orderType, username, password);
     }
 
+    @Transactional
     public Integer choreographyCreate(Integer orderType, String username, String password) {
         OrderEntity orderEntity = new OrderEntity();
         orderEntity.setOrderType(orderType);
@@ -35,6 +38,7 @@ public class OrderService implements OrderServiceInterface {
     }
 
     @Override
+    @Transactional
     public void accountingValidatedChoreography(int orderID, String username, int warehouseReservationID, int cost, int accountingTransactionID, boolean validated) {
         Optional<OrderEntity> orderEntity = orderRepository.findById(orderID);
         if (orderEntity.isEmpty()) {

@@ -6,8 +6,8 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@Table(name = "accounting_transaction")
-public class AccountingTransactionEntity {
+@Table(name = "accounting_transaction_version_file")
+public class AccountingTransactionVersionFileEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,4 +28,8 @@ public class AccountingTransactionEntity {
 
     @Column(name = "cost")
     private Integer cost;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private AccountingTransactionStatusEnum status;
 }

@@ -14,22 +14,37 @@ public class WarehouseMQReceiver {
     @Autowired
     private WarehouseMQSender warehouseSender;
 
-    @RabbitListener(queues = {"warehouse_input", "order_output"})
-    public void receiveCreateAppointment(String in) {
+    @RabbitListener(queues = "warehouse_input")
+    public void receiveCreateReservationOrchestration(String in) {
         System.out.println(" [warehouse service] Received '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         int orderType = jsonObject.getInt("orderType");
         Optional<WarehouseReservationEntity> warehouseReservation = warehouseService.createReservation(orderID, orderType);
         if (warehouseReservation.isPresent()) {
-            warehouseSender.sendSuccess(orderID, warehouseReservation.get().getId(), warehouseReservation.get().getWarehouse().getCost());
+            warehouseSender.sendSuccessOrchestration(orderID, warehouseReservation.get().getId(), warehouseReservation.get().getWarehouse().getCost());
         }
         else {
-            warehouseSender.sendFailure(orderID);
+            warehouseSender.sendFailureOrchestration(orderID);
         }
     }
 
-    @RabbitListener(queues = "accounting_output")
+    @RabbitListener(queues = "#{warehouseOrderOutputQueue.name}")
+    public void receiveCreateReservationChoreography(String in) {
+        System.out.println(" [warehouse service] Received '" + in + "'");
+        JSONObject jsonObject = new JSONObject(in);
+        int orderID = jsonObject.getInt("orderID");
+        int orderType = jsonObject.getInt("orderType");
+        Optional<WarehouseReservationEntity> warehouseReservation = warehouseService.createReservation(orderID, orderType);
+        if (warehouseReservation.isPresent()) {
+            warehouseSender.sendSuccessChoreography(orderID, warehouseReservation.get().getId(), warehouseReservation.get().getWarehouse().getCost());
+        }
+        else {
+            warehouseSender.sendFailureChoreography(orderID);
+        }
+    }
+
+    @RabbitListener(queues = "#{warehouseAccountingOutputQueue.name}")
     public void receiveValidateAppointment(String in) {
         System.out.println(" [warehouse service] Received '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);

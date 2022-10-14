@@ -1,6 +1,7 @@
 package com.ldjuric.saga.accounting;
 
 import org.json.JSONObject;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +11,10 @@ public class AccountingMQSender {
     private RabbitTemplate template;
 
     @Autowired
-    private Queue accountingOutputChoreographyQueue;
+    private Queue accountingOutputOrchestrationQueue;
 
     @Autowired
-    private Queue accountingOutputOrchestrationQueue;
+    private FanoutExchange accountingFanout;
 
     public void sendSuccessChoreography(Integer orderID, AccountingTransactionEntity accountingTransaction) {
         JSONObject jsonMessage = new JSONObject();
@@ -23,7 +24,7 @@ public class AccountingMQSender {
         jsonMessage.put("warehouseReservationID", accountingTransaction.getWarehouseReservationID());
         jsonMessage.put("cost", accountingTransaction.getCost());
         String message = jsonMessage.toString();
-        this.template.convertAndSend(accountingOutputChoreographyQueue.getName(), message);
+        this.template.convertAndSend(accountingFanout.getName(),"", message);
         System.out.println(" [accounting service] Sent '" + message + "'");
     }
 
@@ -32,7 +33,7 @@ public class AccountingMQSender {
         jsonMessage.put("validated", false);
         jsonMessage.put("orderID", orderID);
         String message = jsonMessage.toString();
-        this.template.convertAndSend(accountingOutputChoreographyQueue.getName(), message);
+        this.template.convertAndSend(accountingFanout.getName(), "", message);
         System.out.println(" [accounting service] Sent '" + message + "'");
     }
 

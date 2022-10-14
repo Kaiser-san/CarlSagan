@@ -1,20 +1,28 @@
 package com.ldjuric.saga.accounting;
 
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import javax.sql.DataSource;
 
 @Configuration
 public class AccountingMQConfig {
+
+    @Bean
+    public FanoutExchange accountingFanout() {
+        return new FanoutExchange("accounting.fanout");
+    }
+
     @Bean
     public Queue accountingInputOrchestrationQueue() {
         return new Queue("accounting_input_orchestration", true);
     }
 
-    @Bean
-    public Queue accountingOutputChoreographyQueue() {
-        return new Queue("accounting_output_choreography", true);
-    }
     @Bean
     public Queue accountingOutputOrchestrationQueue() {
         return new Queue("accounting_output_orchestration", true);
@@ -28,5 +36,16 @@ public class AccountingMQConfig {
     @Bean
     public AccountingMQSender accountingSender() {
         return new AccountingMQSender();
+    }
+
+    @Bean
+    public Queue accountingOrderOutputQueue() {
+        return new AnonymousQueue();
+    }
+
+    @Bean
+    public Binding accountingOrderOutputBinding(FanoutExchange orderFanout,
+                                               Queue accountingOrderOutputQueue) {
+        return BindingBuilder.bind(accountingOrderOutputQueue).to(orderFanout);
     }
 }

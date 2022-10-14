@@ -1,6 +1,7 @@
 package com.ldjuric.saga.order;
 
 import org.json.JSONObject;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,7 @@ public class OrderMQSender {
     private RabbitTemplate template;
 
     @Autowired
-    private Queue orderOutputQueue;
+    private FanoutExchange orderFanout;
 
     public void sendChoreography(Integer orderID, Integer orderType, String username, String password) {
         JSONObject jsonMessage = new JSONObject();
@@ -19,7 +20,7 @@ public class OrderMQSender {
         jsonMessage.put("username", username);
         jsonMessage.put("password", password);
         String message = jsonMessage.toString();
-        this.template.convertAndSend(orderOutputQueue.getName(), message);
+        this.template.convertAndSend(orderFanout.getName(), "", message);
         System.out.println(" [order service] Sent '" + message + "'");
     }
 

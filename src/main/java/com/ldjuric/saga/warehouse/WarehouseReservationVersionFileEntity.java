@@ -6,8 +6,8 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@Table(name = "warehouse_reservation")
-public class WarehouseReservationEntity {
+@Table(name = "warehouse_reservation_version_file")
+public class WarehouseReservationVersionFileEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

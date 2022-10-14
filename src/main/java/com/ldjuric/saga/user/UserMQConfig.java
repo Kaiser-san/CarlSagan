@@ -1,7 +1,7 @@
 package com.ldjuric.saga.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +15,13 @@ public class UserMQConfig {
     }
 
     @Bean
-    public Queue userOutputQueue() {
-        return new Queue("user_output", true);
+    public Queue userOutputOrchestrationQueue() {
+        return new Queue("user_output_orchestration", true);
+    }
+
+    @Bean
+    public Queue userOutputChoreographyQueue() {
+        return new Queue("user_output_choreography", true);
     }
 
     @Bean
@@ -27,5 +32,16 @@ public class UserMQConfig {
     @Bean
     public UserMQSender userSender() {
         return new UserMQSender();
+    }
+
+    @Bean
+    public Queue userOrderOutputQueue() {
+        return new AnonymousQueue();
+    }
+
+    @Bean
+    public Binding userOrderOutputBinding(FanoutExchange orderFanout,
+                                          Queue userOrderOutputQueue) {
+        return BindingBuilder.bind(userOrderOutputQueue).to(orderFanout);
     }
 }

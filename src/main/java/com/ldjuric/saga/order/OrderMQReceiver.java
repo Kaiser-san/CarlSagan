@@ -12,36 +12,36 @@ public class OrderMQReceiver {
     @Autowired
     private OrderCreateOrchestrator orderCreateOrchestrator;
 
-    @RabbitListener(queues = "accounting_output_choreography")
+    @RabbitListener(queues = "#{orderAccountingOutputQueue.name}")
     public void receiveAccountingOutputChoreography(String in) {
         System.out.println(" [order service] Received '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
-        String username = jsonObject.get("username").toString();
-        int kitchenAppointmentID = jsonObject.getInt("warehouseReservationID");
-        int cost = jsonObject.getInt("cost");
-        int accountingTransactionID = jsonObject.getInt("accountingTransactionID");
+        String username = jsonObject.optString("username");
+        int kitchenAppointmentID = jsonObject.optInt("warehouseReservationID");
+        int cost = jsonObject.optInt("cost");
+        int accountingTransactionID = jsonObject.optInt("accountingTransactionID");
         boolean validated = jsonObject.getBoolean("validated");
         orderService.accountingValidatedChoreography(orderID, username, kitchenAppointmentID, cost, accountingTransactionID, validated);
     }
 
-    @RabbitListener(queues = "user_output")
+    @RabbitListener(queues = "user_output_orchestration")
     public void receiveUserOutput(String in) {
         System.out.println(" [order service] Received '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
-        String username = jsonObject.get("username").toString();
+        String username = jsonObject.optString("username");
         boolean validated = jsonObject.getBoolean("validated");
         orderCreateOrchestrator.userValidated(orderID, username, validated);
     }
 
-    @RabbitListener(queues = "warehouse_output")
+    @RabbitListener(queues = "warehouse_output_orchestration")
     public void receiveWarehouseOutput(String in) {
         System.out.println(" [order service] Received '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
-        int warehouseReservationID = jsonObject.getInt("warehouseReservationID");
-        int cost = jsonObject.getInt("cost");
+        int warehouseReservationID = jsonObject.optInt("warehouseReservationID");
+        int cost = jsonObject.optInt("cost");
         boolean validated = jsonObject.getBoolean("validated");
         orderCreateOrchestrator.warehouseValidated(orderID, warehouseReservationID, cost, validated);
     }
@@ -51,7 +51,7 @@ public class OrderMQReceiver {
         System.out.println(" [order service] Received '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
-        int accountingTransactionID = jsonObject.getInt("accountingTransactionID");
+        int accountingTransactionID = jsonObject.optInt("accountingTransactionID");
         boolean validated = jsonObject.getBoolean("validated");
         orderCreateOrchestrator.accountingValidated(orderID, accountingTransactionID, validated);
     }

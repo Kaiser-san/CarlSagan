@@ -13,9 +13,17 @@ CREATE TABLE warehouse(
 
 CREATE TABLE warehouse_reservation(
     id INT(8) NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    warehouseID INT(8) NOT NULL,
-    orderID INT(8) NOT NULL UNIQUE,
-    orderType INT(8) NOT NULL,
+    warehouse_id INT(8) NOT NULL,
+    order_id INT(8) NOT NULL UNIQUE,
+    order_type INT(8) NOT NULL,
+    status VARCHAR(100)
+);
+
+CREATE TABLE warehouse_reservation_version_file(
+    id INT(8) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    warehouse_id INT(8) NOT NULL,
+    order_id INT(8) NOT NULL UNIQUE,
+    order_type INT(8) NOT NULL,
     status VARCHAR(100)
 );
 
@@ -27,25 +35,38 @@ CREATE TABLE accounting(
 
 CREATE TABLE accounting_transaction(
      id INT(8) NOT NULL PRIMARY KEY AUTO_INCREMENT,
-     accountingID INT(8),
-     orderID INT(8) NOT NULL UNIQUE,
-     warehouseReservationID INT(8),
+     accounting_id INT(8),
+     order_id INT(8) NOT NULL UNIQUE,
+     warehouse_reservation_id INT(8),
      cost INT(8),
-     orderType INT(8),
+     order_type INT(8)
+);
+
+CREATE TABLE accounting_transaction_version_file(
+     id INT(8) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+     accounting_id INT(8),
+     order_id INT(8) NOT NULL,
+     warehouse_reservation_id INT(8),
+     cost INT(8),
+     order_type INT(8),
      status VARCHAR(100)
 );
 
 CREATE TABLE order_table(
     id INT(8) NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    orderType INT(8) NOT NULL,
+    order_type INT(8) NOT NULL,
     username VARCHAR(100),
-    warehouseReservationID INT(8),
+    warehouse_reservation_id INT(8),
     cost INT(8),
-    accountingTransactionID INT(8),
+    accounting_transaction_id INT(8),
     status VARCHAR(100)
 );
 
-ALTER TABLE warehouse_reservation ADD CONSTRAINT FK_Warehouse_Reservation_WarehouseID FOREIGN KEY (warehouseID) REFERENCES warehouse(id);
-ALTER TABLE accounting_transaction ADD CONSTRAINT FK_Accounting_Transaction_User FOREIGN KEY (accountingID) REFERENCES accounting(id);
+ALTER TABLE warehouse_reservation ADD CONSTRAINT FK_Warehouse_Reservation_WarehouseID FOREIGN KEY (warehouse_id) REFERENCES warehouse(id);
+ALTER TABLE accounting_transaction ADD CONSTRAINT FK_Accounting_Transaction_User FOREIGN KEY (accounting_id) REFERENCES accounting(id);
+ALTER TABLE accounting_transaction_version_file ADD CONSTRAINT FK_Accounting_Transaction_Version_Accounting FOREIGN KEY (accounting_id) REFERENCES accounting(id);
+ALTER TABLE warehouse_reservation_version_file ADD CONSTRAINT FK_WareHouse_Reservation_Version_Warehouse FOREIGN KEY (warehouse_id) REFERENCES warehouse(id);
 
-INSERT INTO user(username, password, name)VALUES('admin', 'admin', 'admin');
+INSERT INTO user(username, password, name) VALUES ('admin', 'admin', 'admin');
+INSERT INTO accounting(username, credit) VALUES ('admin', 10000);
+INSERT INTO warehouse(name, cost) VALUES ('first', 100);

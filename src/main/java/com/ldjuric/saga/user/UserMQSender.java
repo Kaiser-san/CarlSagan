@@ -11,15 +11,28 @@ public class UserMQSender {
     private RabbitTemplate template;
 
     @Autowired
-    private Queue userOutputQueue;
+    private Queue userOutputOrchestrationQueue;
 
-    public void send(boolean result, int orderID, String username) {
+    @Autowired
+    private Queue userOutputChoreographyQueue;
+
+    public void sendOrchestration(boolean result, int orderID, String username) {
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("validated", result);
-        jsonMessage.put("order_id", orderID);
+        jsonMessage.put("orderID", orderID);
         jsonMessage.put("username", username);
         String message = jsonMessage.toString();
-        this.template.convertAndSend(userOutputQueue.getName(), message);
+        this.template.convertAndSend(userOutputOrchestrationQueue.getName(), message);
+        System.out.println(" [user service] Sent '" + message + "'");
+    }
+
+    public void sendChoreography(boolean result, int orderID, String username) {
+        JSONObject jsonMessage = new JSONObject();
+        jsonMessage.put("validated", result);
+        jsonMessage.put("orderID", orderID);
+        jsonMessage.put("username", username);
+        String message = jsonMessage.toString();
+        this.template.convertAndSend(userOutputChoreographyQueue.getName(), message);
         System.out.println(" [user service] Sent '" + message + "'");
     }
 }

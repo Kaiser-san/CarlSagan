@@ -12,14 +12,25 @@ public class UserMQReceiver {
     @Autowired
     private UserMQSender userSender;
 
-    @RabbitListener(queues = {"user_input", "order_output"})
-    public void receive(String in) {
+    @RabbitListener(queues = "user_input")
+    public void receiveOrchestration(String in) {
         System.out.println(" [user service] Received '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
-        int orderID = jsonObject.getInt("order_id");
+        int orderID = jsonObject.getInt("orderID");
         String username = jsonObject.get("username").toString();
         String password = jsonObject.get("password").toString();
         boolean result = userService.validateUser(username, password);
-        userSender.send(result, orderID, username);
+        userSender.sendOrchestration(result, orderID, username);
+    }
+
+    @RabbitListener(queues = "#{userOrderOutputQueue.name}")
+    public void receiveChoreography(String in) {
+        System.out.println(" [user service] Received '" + in + "'");
+        JSONObject jsonObject = new JSONObject(in);
+        int orderID = jsonObject.getInt("orderID");
+        String username = jsonObject.get("username").toString();
+        String password = jsonObject.get("password").toString();
+        boolean result = userService.validateUser(username, password);
+        userSender.sendChoreography(result, orderID, username);
     }
 }

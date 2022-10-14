@@ -1,6 +1,6 @@
 package com.ldjuric.saga.warehouse;
 
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,8 +12,13 @@ public class WarehouseMQConfig {
     }
 
     @Bean
-    public Queue warehouseOutputQueue() {
-        return new Queue("warehouse_output", true);
+    public Queue warehouseOutputOrchestrationQueue() {
+        return new Queue("warehouse_output_orchestration", true);
+    }
+
+    @Bean
+    public Queue warehouseOutputChoreographyQueue() {
+        return new Queue("warehouse_output_choreography", true);
     }
 
     @Bean
@@ -24,5 +29,27 @@ public class WarehouseMQConfig {
     @Bean
     public WarehouseMQSender warehouseSender() {
         return new WarehouseMQSender();
+    }
+
+    @Bean
+    public Queue warehouseOrderOutputQueue() {
+        return new AnonymousQueue();
+    }
+
+    @Bean
+    public Binding warehouseOrderOutputBinding(FanoutExchange orderFanout,
+                                          Queue warehouseOrderOutputQueue) {
+        return BindingBuilder.bind(warehouseOrderOutputQueue).to(orderFanout);
+    }
+
+    @Bean
+    public Queue warehouseAccountingOutputQueue() {
+        return new AnonymousQueue();
+    }
+
+    @Bean
+    public Binding warehouseAccountingOutputBinding(FanoutExchange accountingFanout,
+                                               Queue warehouseAccountingOutputQueue) {
+        return BindingBuilder.bind(warehouseAccountingOutputQueue).to(accountingFanout);
     }
 }

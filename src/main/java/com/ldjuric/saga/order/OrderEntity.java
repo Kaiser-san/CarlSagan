@@ -13,19 +13,19 @@ public class OrderEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "orderType")
+    @Column(name = "order_type")
     private Integer orderType;
 
     @Column(name = "username")
     private String username;
 
-    @Column(name = "warehouseReservationID")
+    @Column(name = "warehouse_reservation_id")
     private Integer warehouseReservationID;
 
     @Column(name = "cost")
     private Integer cost;
 
-    @Column(name = "accountingTransactionID")
+    @Column(name = "accounting_transaction_id")
     private Integer accountingTransactionID;
 
     @Enumerated(EnumType.STRING)

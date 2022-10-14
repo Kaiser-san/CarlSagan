@@ -17,6 +17,6 @@ public class UserService implements UserServiceInterface {
     @Override
     public boolean validateUser(String username, String password) {
         UserEntity user = this.userRepository.findByUsername(username);
-        return user != null ? user.getPassword() == password : false;
+        return user != null && user.getPassword().equals(password);
     }
 }
