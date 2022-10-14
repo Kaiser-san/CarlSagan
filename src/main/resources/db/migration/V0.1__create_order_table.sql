@@ -21,9 +21,7 @@ CREATE TABLE warehouse_reservation(
 
 CREATE TABLE warehouse_reservation_version_file(
     id INT(8) NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    warehouse_id INT(8) NOT NULL,
     order_id INT(8) NOT NULL UNIQUE,
-    order_type INT(8) NOT NULL,
     status VARCHAR(100)
 );
 
@@ -65,7 +63,6 @@ CREATE TABLE order_table(
 ALTER TABLE warehouse_reservation ADD CONSTRAINT FK_Warehouse_Reservation_WarehouseID FOREIGN KEY (warehouse_id) REFERENCES warehouse(id);
 ALTER TABLE accounting_transaction ADD CONSTRAINT FK_Accounting_Transaction_User FOREIGN KEY (accounting_id) REFERENCES accounting(id);
 ALTER TABLE accounting_transaction_version_file ADD CONSTRAINT FK_Accounting_Transaction_Version_Accounting FOREIGN KEY (accounting_id) REFERENCES accounting(id);
-ALTER TABLE warehouse_reservation_version_file ADD CONSTRAINT FK_WareHouse_Reservation_Version_Warehouse FOREIGN KEY (warehouse_id) REFERENCES warehouse(id);
 
 INSERT INTO user(username, password, name) VALUES ('admin', 'admin', 'admin');
 INSERT INTO accounting(username, credit) VALUES ('admin', 10000);

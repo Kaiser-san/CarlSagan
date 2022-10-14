@@ -12,15 +12,8 @@ public class WarehouseReservationVersionFileEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "warehouse_id")
-    private WarehouseEntity warehouse;
-
     @Column(name = "order_id")
     private Integer orderID;
-
-    @Column(name = "order_type")
-    private Integer orderType;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")

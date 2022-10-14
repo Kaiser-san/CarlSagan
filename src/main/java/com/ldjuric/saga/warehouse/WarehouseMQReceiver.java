@@ -20,12 +20,13 @@ public class WarehouseMQReceiver {
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         int orderType = jsonObject.getInt("orderType");
-        Optional<WarehouseReservationEntity> warehouseReservation = warehouseService.createReservation(orderID, orderType);
-        if (warehouseReservation.isPresent()) {
-            warehouseSender.sendSuccessOrchestration(orderID, warehouseReservation.get().getId(), warehouseReservation.get().getWarehouse().getCost());
+        WarehouseReservationStatusEnum status = warehouseService.createReservation(orderID, orderType);
+        if (status == WarehouseReservationStatusEnum.FINALIZED) {
+            WarehouseReservationEntity reservation = warehouseService.getWarehouseReservation(orderID);
+            warehouseSender.sendSuccessChoreography(orderID, reservation.getId(), reservation.getWarehouse().getCost());
         }
-        else {
-            warehouseSender.sendFailureOrchestration(orderID);
+        else if (status == WarehouseReservationStatusEnum.REJECTED){
+            warehouseSender.sendFailureChoreography(orderID);
         }
     }
 
@@ -35,11 +36,12 @@ public class WarehouseMQReceiver {
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         int orderType = jsonObject.getInt("orderType");
-        Optional<WarehouseReservationEntity> warehouseReservation = warehouseService.createReservation(orderID, orderType);
-        if (warehouseReservation.isPresent()) {
-            warehouseSender.sendSuccessChoreography(orderID, warehouseReservation.get().getId(), warehouseReservation.get().getWarehouse().getCost());
+        WarehouseReservationStatusEnum status = warehouseService.createReservation(orderID, orderType);
+        if (status == WarehouseReservationStatusEnum.FINALIZED) {
+            WarehouseReservationEntity reservation = warehouseService.getWarehouseReservation(orderID);
+            warehouseSender.sendSuccessChoreography(orderID, reservation.getId(), reservation.getWarehouse().getCost());
         }
-        else {
+        else if (status == WarehouseReservationStatusEnum.REJECTED){
             warehouseSender.sendFailureChoreography(orderID);
         }
     }
