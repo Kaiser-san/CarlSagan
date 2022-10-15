@@ -23,7 +23,7 @@ public class OrderMQSender implements LogServiceInterface {
     private Queue warehouseInputQueue;
 
     @Autowired
-    private Queue warehouseInputInvalidateQueue;
+    private Queue warehouseInputValidateQueue;
 
     @Autowired
     private Queue accountingInputOrchestrationQueue;
@@ -42,7 +42,7 @@ public class OrderMQSender implements LogServiceInterface {
         this.log("[OrderService::sendChoreography] sent " + message);
     }
 
-    public void sendUserValidate(Integer orderID, String username, String password) {
+    public void sendUserValidateOrchestration(Integer orderID, String username, String password) {
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("orderID", orderID);
         jsonMessage.put("username", username);
@@ -52,7 +52,7 @@ public class OrderMQSender implements LogServiceInterface {
         this.log("[OrderService::sendUserValidate] sent " + message);
     }
 
-    public void sendWarehouseValidate(Integer orderID, Integer orderType) {
+    public void sendWarehouseCreateOrderOrchestration(Integer orderID, Integer orderType) {
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("orderID", orderID);
         jsonMessage.put("orderType", orderType);
@@ -61,12 +61,13 @@ public class OrderMQSender implements LogServiceInterface {
         this.log("[OrderService::sendKitchenValidate] sent " + message);
     }
 
-    public void sendWarehouseInvalidate(int orderID, Integer orderType) {
+    public void sendWarehouseValidate(int orderID, Integer orderType, boolean validated) {
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("orderID", orderID);
         jsonMessage.put("orderType", orderType);
+        jsonMessage.put("validated", validated);
         String message = jsonMessage.toString();
-        this.template.convertAndSend(warehouseInputInvalidateQueue.getName(), message);
+        this.template.convertAndSend(warehouseInputValidateQueue.getName(), message);
         this.log("[OrderService::sendKitchenValidate] sent " + message);
     }
 

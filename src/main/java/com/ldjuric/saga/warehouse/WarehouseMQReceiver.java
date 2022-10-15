@@ -22,7 +22,7 @@ public class WarehouseMQReceiver {
         warehouseService.createOrderOrchestration(orderID, orderType);
     }
 
-    @RabbitListener(queues = "warehouse_input_invalidate")
+    @RabbitListener(queues = "warehouse_input_validate")
     public void receiveInvalidateOrderOrchestration(String in) {
         sender.log("[WarehouseService::receiveInvalidateOrderOrchestration] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);

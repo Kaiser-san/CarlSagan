@@ -15,7 +15,7 @@ CREATE TABLE warehouse_stock(
 CREATE TABLE warehouse_stock_version_file(
     id INT(8) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     order_id INT(8) NOT NULL UNIQUE,
-    order_type INT(8) NOT NULL UNIQUE,
+    order_type INT(8),
     status VARCHAR(100)
 );
 

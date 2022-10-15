@@ -12,8 +12,8 @@ public class WarehouseMQConfig {
         return new Queue("warehouse_input", true);
     }
     @Bean
-    public Queue warehouseInputInvalidateQueue() {
-        return new Queue("warehouse_input_invalidate", true);
+    public Queue warehouseInputValidateQueue() {
+        return new Queue("warehouse_input_validate", true);
     }
 
     @Bean

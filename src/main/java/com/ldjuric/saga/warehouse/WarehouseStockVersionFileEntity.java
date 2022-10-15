@@ -17,7 +17,7 @@ public class WarehouseStockVersionFileEntity {
     @Column(name = "order_id", nullable = false, unique = true)
     private Integer orderID;
 
-    @Column(name = "order_type", nullable = false, unique = true)
+    @Column(name = "order_type")
     private Integer orderType;
 
     @Enumerated(EnumType.STRING)

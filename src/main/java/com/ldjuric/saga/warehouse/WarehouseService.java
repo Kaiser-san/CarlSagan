@@ -43,6 +43,7 @@ public class WarehouseService {
             versionFile.setOrderID(orderID);
             versionFile.setOrderType(orderType);
             versionFile.setStatus(WarehouseStockStatusEnum.INITIALIZING);
+            warehouseStockVersionFileRepository.save(versionFile);
 
             sender.log("[WarehouseService::createReservation] stock found and reduced, validate; orderID:" + orderID);
             sender.sendSuccessOrchestration(orderID, warehouseStockEntity.get().getCost());
@@ -70,6 +71,7 @@ public class WarehouseService {
             versionFile.setOrderID(orderID);
             versionFile.setOrderType(orderType);
             versionFile.setStatus(WarehouseStockStatusEnum.INITIALIZING);
+            warehouseStockVersionFileRepository.save(versionFile);
 
             sender.log("[WarehouseService::createReservation] stock found and reduced, validate; orderID:" + orderID);
             sender.sendSuccessChoreography(orderID, warehouseStockEntity.get().getCost());

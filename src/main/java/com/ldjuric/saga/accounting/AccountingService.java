@@ -32,9 +32,11 @@ public class AccountingService {
         transactionEntity.setCost(cost);
 
         Optional<AccountingEntity> accountingEntity = accountingRepository.findByUsername(username);
-        if (accountingEntity.isPresent()) {
+        if (accountingEntity.isPresent() && accountingEntity.get().getCredit() > cost) {
             sender.log("[AccountingService::createAndValidateOrderOrchestration] enough credit; orderID:" + orderID);
             transactionEntity.setAccountingEntity(accountingEntity.get());
+            accountingEntity.get().setCredit(accountingEntity.get().getCredit() - cost);
+            accountingRepository.save(accountingEntity.get());
         }
         else {
             sender.log("[AccountingService::createAndValidateOrderOrchestration] not enough credit; orderID:" + orderID);

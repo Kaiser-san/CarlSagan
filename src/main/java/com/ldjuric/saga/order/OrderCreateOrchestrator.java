@@ -24,8 +24,8 @@ public class OrderCreateOrchestrator {
         orderRepository.save(orderEntity);
         Integer orderID = orderEntity.getId();
         sender.log("[OrderCreateOrchestrator::startOrchestration] created order; orderID:" + orderID);
-        sender.sendUserValidate(orderID, username, password);
-        sender.sendWarehouseValidate(orderID, orderType);
+        sender.sendUserValidateOrchestration(orderID, username, password);
+        sender.sendWarehouseCreateOrderOrchestration(orderID, orderType);
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -40,7 +40,7 @@ public class OrderCreateOrchestrator {
         if (!validated) {
             sender.log("[OrderCreateOrchestrator::userValidated] user invalid, reject order; orderID:" + orderID);
             orderEntity.get().setStatus(OrderStatusEnum.REJECTED);
-            sender.sendWarehouseInvalidate(orderID, orderEntity.get().getOrderType());
+            sender.sendWarehouseValidate(orderID, orderEntity.get().getOrderType(), false);
             return;
         }
 
@@ -97,6 +97,8 @@ public class OrderCreateOrchestrator {
         orderEntity.get().setStatus(OrderStatusEnum.FINALIZED);
         orderRepository.save(orderEntity.get());
         sender.log("[OrderCreateOrchestrator::accountingValidated] order finalized; orderID:" + orderID);
+
+        sender.sendWarehouseValidate(orderID, orderEntity.get().getOrderType(), true);
     }
 
     private boolean validateUserAndWarehouse(OrderEntity orderEntity) {
