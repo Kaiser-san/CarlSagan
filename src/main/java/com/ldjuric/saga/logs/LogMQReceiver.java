@@ -2,7 +2,9 @@ package com.ldjuric.saga.logs;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 
+@Profile({"log", "all"})
 public class LogMQReceiver {
     @Autowired
     private LogService logService;

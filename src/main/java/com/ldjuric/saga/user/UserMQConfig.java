@@ -3,6 +3,7 @@ package com.ldjuric.saga.user;
 import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class UserMQConfig {
@@ -22,11 +23,13 @@ public class UserMQConfig {
         return new Queue("user_output_choreography", true);
     }
 
+    @Profile({"user", "all"})
     @Bean
     public UserMQReceiver userReceiver() {
         return new UserMQReceiver();
     }
 
+    @Profile({"user", "all"})
     @Bean
     public UserMQSender userSender() {
         return new UserMQSender();

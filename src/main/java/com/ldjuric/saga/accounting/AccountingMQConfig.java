@@ -3,6 +3,7 @@ package com.ldjuric.saga.accounting;
 import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class AccountingMQConfig {
@@ -22,11 +23,13 @@ public class AccountingMQConfig {
         return new Queue("accounting_output_orchestration", true);
     }
 
+    @Profile({"accounting", "all"})
     @Bean
     public AccountingMQReceiver accountingReceiver() {
         return new AccountingMQReceiver();
     }
 
+    @Profile({"accounting", "all"})
     @Bean
     public AccountingMQSender accountingSender() {
         return new AccountingMQSender();

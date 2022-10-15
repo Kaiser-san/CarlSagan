@@ -3,6 +3,7 @@ package com.ldjuric.saga.warehouse;
 import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class WarehouseMQConfig {
@@ -25,11 +26,13 @@ public class WarehouseMQConfig {
         return new Queue("warehouse_output_choreography", true);
     }
 
+    @Profile({"warehouse", "all"})
     @Bean
     public WarehouseMQReceiver warehouseReceiver() {
         return new WarehouseMQReceiver();
     }
 
+    @Profile({"warehouse", "all"})
     @Bean
     public WarehouseMQSender warehouseSender() {
         return new WarehouseMQSender();
