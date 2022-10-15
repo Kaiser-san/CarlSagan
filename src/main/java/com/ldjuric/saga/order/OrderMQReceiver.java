@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class OrderMQReceiver {
     @Autowired
-    private OrderServiceInterface orderService;
+    private OrderService orderService;
 
     @Autowired
     private OrderCreateOrchestrator orderCreateOrchestrator;
@@ -22,11 +22,10 @@ public class OrderMQReceiver {
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         String username = jsonObject.optString("username");
-        int kitchenAppointmentID = jsonObject.optInt("warehouseReservationID");
         int cost = jsonObject.optInt("cost");
         int accountingTransactionID = jsonObject.optInt("accountingTransactionID");
         boolean validated = jsonObject.getBoolean("validated");
-        orderService.accountingValidatedChoreography(orderID, username, kitchenAppointmentID, cost, accountingTransactionID, validated);
+        orderService.accountingValidatedChoreography(orderID, username, cost, accountingTransactionID, validated);
     }
 
     @RabbitListener(queues = "user_output_orchestration")
@@ -44,10 +43,9 @@ public class OrderMQReceiver {
         sender.log("[OrderService::receiveWarehouseOutput] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
-        int warehouseReservationID = jsonObject.optInt("warehouseReservationID");
         int cost = jsonObject.optInt("cost");
         boolean validated = jsonObject.getBoolean("validated");
-        orderCreateOrchestrator.warehouseValidated(orderID, warehouseReservationID, cost, validated);
+        orderCreateOrchestrator.warehouseValidated(orderID, cost, validated);
     }
 
     @RabbitListener(queues = "accounting_output_orchestration")

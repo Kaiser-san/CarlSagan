@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public class AccountingMQReceiver {
     @Autowired
-    private AccountingServiceInterface accountingService;
+    private AccountingService accountingService;
 
     @Autowired
     private AccountingMQSender sender;
@@ -20,10 +20,9 @@ public class AccountingMQReceiver {
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         int orderType = jsonObject.getInt("orderType");
-        int warehouseAppointmentID = jsonObject.getInt("warehouseReservationID");
         int cost = jsonObject.getInt("cost");
         String username = jsonObject.getString("username");
-        Optional<AccountingTransactionEntity> accountingTransaction = accountingService.createAndValidateOrderOrchestration(orderID, orderType, warehouseAppointmentID, cost, username);
+        Optional<AccountingTransactionEntity> accountingTransaction = accountingService.createAndValidateOrderOrchestration(orderID, orderType, cost, username);
         sendResponseOrchestration(orderID, accountingTransaction);
     }
 
@@ -42,10 +41,9 @@ public class AccountingMQReceiver {
         sender.log("[AccountingService::receiveWarehouseOutput] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
-        int warehouseAppointmentID = jsonObject.optInt("warehouseReservationID");
         int cost = jsonObject.optInt("cost");
         boolean validated = jsonObject.getBoolean("validated");
-        AccountingTransactionStatusEnum status = accountingService.createOrValidateWarehouse(orderID, warehouseAppointmentID, cost, validated);
+        AccountingTransactionStatusEnum status = accountingService.createOrValidateWarehouse(orderID, cost, validated);
         sendResponseChoreography(orderID, status);
     }
 

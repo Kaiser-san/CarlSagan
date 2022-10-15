@@ -9,7 +9,7 @@ import java.util.Optional;
 
 
 @Service
-public class OrderService implements OrderServiceInterface {
+public class OrderService {
 
     @Autowired
     private OrderCreateOrchestrator orderCreateOrchestrator;
@@ -42,9 +42,8 @@ public class OrderService implements OrderServiceInterface {
         return orderEntity.getId();
     }
 
-    @Override
     @Transactional
-    public void accountingValidatedChoreography(int orderID, String username, int warehouseReservationID, int cost, int accountingTransactionID, boolean validated) {
+    public void accountingValidatedChoreography(int orderID, String username, int cost, int accountingTransactionID, boolean validated) {
         sender.log("[OrderService::accountingValidatedChoreography] start; orderID:" + orderID);
         Optional<OrderEntity> orderEntity = orderRepository.findById(orderID);
         if (orderEntity.isEmpty()) {
@@ -59,7 +58,6 @@ public class OrderService implements OrderServiceInterface {
         }
 
         orderEntity.get().setUsername(username);
-        orderEntity.get().setWarehouseReservationID(warehouseReservationID);
         orderEntity.get().setCost(cost);
         orderEntity.get().setAccountingTransactionID(accountingTransactionID);
         orderEntity.get().setStatus(OrderStatusEnum.FINALIZED);

@@ -23,9 +23,6 @@ public class AccountingTransactionVersionFileEntity {
     @Column(name = "order_type")
     private Integer orderType;
 
-    @Column(name = "warehouse_reservation_id")
-    private Integer warehouseReservationID;
-
     @Column(name = "cost")
     private Integer cost;
 

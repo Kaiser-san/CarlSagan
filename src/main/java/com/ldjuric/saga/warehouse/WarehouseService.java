@@ -1,8 +1,6 @@
 package com.ldjuric.saga.warehouse;
 
-import com.ldjuric.saga.accounting.AccountingTransactionEntity;
 import com.ldjuric.saga.interfaces.WarehouseServiceInterface;
-import com.ldjuric.saga.order.OrderMQSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -11,93 +9,104 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
-public class WarehouseService implements WarehouseServiceInterface {
+public class WarehouseService {
     @Autowired
-    private WarehouseRepository warehouseRepository;
-    @Autowired
-    private WarehouseReservationRepository warehouseReservationRepository;
+    private WarehouseStockRepository warehouseStockRepository;
 
     @Autowired
-    private WarehouseReservationVersionFileRepository warehouseReservationVersionFileRepository;
+    private WarehouseStockVersionFileRepository warehouseStockVersionFileRepository;
 
     @Autowired
     private WarehouseMQSender sender;
 
-    public String getWarehouseName(Integer id) {
-        Optional<WarehouseEntity> warehouse = warehouseRepository.findById(id);
-        return warehouse.isPresent() ? warehouse.get().getName() : "";
+    public String getWarehouse(Integer id) {
+        Optional<WarehouseStockEntity> warehouse = warehouseStockRepository.findById(id);
+        return warehouse.isPresent() ? warehouse.get().toString() : "";
     }
 
-    @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public WarehouseReservationStatusEnum createReservation(int orderID, int orderType) {
+    public void createOrderOrchestration(int orderID, int orderType) {
         sender.log("[WarehouseService::createReservation] start; orderID:" + orderID);
-        Optional<WarehouseReservationVersionFileEntity> versionFile = warehouseReservationVersionFileRepository.findByOrderID(orderID);
-        if (versionFile.isPresent() && versionFile.get().getStatus() == WarehouseReservationStatusEnum.REJECTED) {
+        Optional<WarehouseStockVersionFileEntity> existingVersionFile = warehouseStockVersionFileRepository.findByOrderID(orderID);
+        if (existingVersionFile.isPresent() && existingVersionFile.get().getStatus() == WarehouseStockStatusEnum.REJECTED) {
             sender.log("[WarehouseService::createReservation] already rejected, do nothing; orderID:" + orderID);
-            return WarehouseReservationStatusEnum.INITIALIZING;
+            return;
         }
 
-        List<WarehouseReservationEntity> warehouseReservations = warehouseReservationRepository.findAllByOrderType(orderType);
-        Set<WarehouseEntity> warehouseEntities = new HashSet<WarehouseEntity>((Collection) warehouseRepository.findAll());
-        for (WarehouseReservationEntity warehouseReservation : warehouseReservations) {
-            if (warehouseReservation.getStatus() == WarehouseReservationStatusEnum.INITIALIZING || warehouseReservation.getStatus() == WarehouseReservationStatusEnum.FINALIZED) {
-                //filter out approved or in progress reservations
-                warehouseEntities.remove(warehouseReservation.getWarehouse());
-            }
-        }
+        Optional<WarehouseStockEntity> warehouseStockEntity = warehouseStockRepository.findByOrderType(orderType);
+        if (warehouseStockEntity.isPresent() && warehouseStockEntity.get().getStock() > 0) {
+            warehouseStockEntity.get().setStock(warehouseStockEntity.get().getStock() - 1);
+            warehouseStockRepository.save(warehouseStockEntity.get());
 
-        Optional<WarehouseEntity> warehouseEntity = warehouseEntities.stream().min(Comparator.comparingInt(WarehouseEntity::getCost));
-        //if, after filtering, there are still available warehouses, pick the lowest cost one
-        if (warehouseEntity.isPresent()) {
-            WarehouseReservationEntity warehouseReservation = new WarehouseReservationEntity();
-            warehouseReservation.setWarehouse(warehouseEntity.get());
-            warehouseReservation.setOrderID(orderID);
-            warehouseReservation.setOrderType(orderType);
-            warehouseReservation.setStatus(WarehouseReservationStatusEnum.INITIALIZING);
-            warehouseReservationRepository.save(warehouseReservation);
-            sender.log("[WarehouseService::createReservation] free warehouse found, validate; orderID:" + orderID);
-            return WarehouseReservationStatusEnum.FINALIZED;
+            WarehouseStockVersionFileEntity versionFile = new WarehouseStockVersionFileEntity();
+            versionFile.setOrderID(orderID);
+            versionFile.setOrderType(orderType);
+            versionFile.setStatus(WarehouseStockStatusEnum.INITIALIZING);
+
+            sender.log("[WarehouseService::createReservation] stock found and reduced, validate; orderID:" + orderID);
+            sender.sendSuccessOrchestration(orderID, warehouseStockEntity.get().getCost());
+            return;
         }
-        sender.log("[WarehouseService::createReservation] no free warehouses, reject; orderID:" + orderID);
-        return WarehouseReservationStatusEnum.REJECTED;
+        sender.log("[WarehouseService::createReservation] no stock found for order type, reject; orderID:" + orderID);
+        sender.sendFailureOrchestration(orderID);
     }
 
-    @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public void createOrderChoreography(int orderID, int orderType) {
+        sender.log("[WarehouseService::createReservation] start; orderID:" + orderID);
+        Optional<WarehouseStockVersionFileEntity> existingVersionFile = warehouseStockVersionFileRepository.findByOrderID(orderID);
+        if (existingVersionFile.isPresent() && existingVersionFile.get().getStatus() == WarehouseStockStatusEnum.REJECTED) {
+            sender.log("[WarehouseService::createReservation] already rejected, do nothing; orderID:" + orderID);
+            return;
+        }
+
+        Optional<WarehouseStockEntity> warehouseStockEntity = warehouseStockRepository.findByOrderType(orderType);
+        if (warehouseStockEntity.isPresent() && warehouseStockEntity.get().getStock() > 0) {
+            warehouseStockEntity.get().setStock(warehouseStockEntity.get().getStock() - 1);
+            warehouseStockRepository.save(warehouseStockEntity.get());
+
+            WarehouseStockVersionFileEntity versionFile = new WarehouseStockVersionFileEntity();
+            versionFile.setOrderID(orderID);
+            versionFile.setOrderType(orderType);
+            versionFile.setStatus(WarehouseStockStatusEnum.INITIALIZING);
+
+            sender.log("[WarehouseService::createReservation] stock found and reduced, validate; orderID:" + orderID);
+            sender.sendSuccessChoreography(orderID, warehouseStockEntity.get().getCost());
+            return;
+        }
+        sender.log("[WarehouseService::createReservation] no stock found for order type, reject; orderID:" + orderID);
+        sender.sendFailureChoreography(orderID);
+    }
+
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void validateReservation(int orderID, boolean validated) {
         sender.log("[WarehouseService::validateReservation] start; orderID:" + orderID);
-        Optional<WarehouseReservationEntity> warehouseReservation = warehouseReservationRepository.findByOrderID(orderID);
-        if (warehouseReservation.isPresent()) {
+        Optional<WarehouseStockVersionFileEntity> existingVersionFile = warehouseStockVersionFileRepository.findByOrderID(orderID);
+        if (existingVersionFile.isPresent()) {
             if (validated) {
-                sender.log("[WarehouseService::createReservation] validateReservation, finalize it; orderID:" + orderID);
-                warehouseReservation.get().setStatus(WarehouseReservationStatusEnum.FINALIZED);
-                warehouseReservationRepository.save(warehouseReservation.get());
+                sender.log("[WarehouseService::validateReservation] validated reservation, finalize it; orderID:" + orderID);
+                existingVersionFile.get().setStatus(WarehouseStockStatusEnum.FINALIZED);
+                warehouseStockVersionFileRepository.save(existingVersionFile.get());
             }
             else {
-                sender.log("[WarehouseService::createReservation] accounting invalid, reject; orderID:" + orderID);
-                warehouseReservationRepository.delete(warehouseReservation.get());
+                sender.log("[WarehouseService::validateReservation] accounting invalid, reject; orderID:" + orderID);
+                existingVersionFile.get().setStatus(WarehouseStockStatusEnum.REJECTED);
+                warehouseStockVersionFileRepository.save(existingVersionFile.get());
+
+                Optional<WarehouseStockEntity> warehouseStockEntity = warehouseStockRepository.findByOrderType(existingVersionFile.get().getOrderType());
+                warehouseStockEntity.get().setStock(warehouseStockEntity.get().getStock() + 1);
+                warehouseStockRepository.save(warehouseStockEntity.get());
+                sender.log("[WarehouseService::validateReservation] accounting invalid, rejected and saved; orderID:" + orderID);
             }
         }
         else {
-            if (warehouseReservationVersionFileRepository.findByOrderID(orderID).isPresent()) {
-                sender.log("[WarehouseService::createReservation] version file already present; orderID:" + orderID);
-                return;
-            }
             //if not present, add a version file entity, so that when the message from order comes, we can reject it
             //should only return invalid here, as accounting shouldn't finalize without our message first
-            WarehouseReservationVersionFileEntity versionFile = new WarehouseReservationVersionFileEntity();
+            WarehouseStockVersionFileEntity versionFile = new WarehouseStockVersionFileEntity();
             versionFile.setOrderID(orderID);
-            versionFile.setStatus(validated ? WarehouseReservationStatusEnum.FINALIZED : WarehouseReservationStatusEnum.REJECTED);
-            warehouseReservationVersionFileRepository.save(versionFile);
+            versionFile.setStatus(validated ? WarehouseStockStatusEnum.FINALIZED : WarehouseStockStatusEnum.REJECTED);
+            warehouseStockVersionFileRepository.save(versionFile);
             sender.log("[WarehouseService::createReservation] create version file; orderID:" + orderID + " status:" + versionFile.getStatus());
         }
-    }
-
-    @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    public WarehouseReservationEntity getWarehouseReservation(int orderID) {
-        Optional<WarehouseReservationEntity> reservation = warehouseReservationRepository.findByOrderID(orderID);
-        return reservation.orElse(null);
     }
 }

@@ -6,15 +6,18 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@Table(name = "warehouse")
-public class WarehouseEntity {
+@Table(name = "warehouse_stock")
+public class WarehouseStockEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "name", nullable = false, unique = true)
-    private String name;
+    @Column(name = "order_type", nullable = false, unique = true)
+    private Integer orderType;
 
     @Column(name = "cost")
     private Integer cost;
+
+    @Column(name = "stock")
+    private Integer stock;
 }

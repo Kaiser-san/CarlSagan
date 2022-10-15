@@ -10,8 +10,8 @@ import java.util.Optional;
 
 
 @Repository
-public interface WarehouseReservationVersionFileRepository extends CrudRepository<WarehouseReservationVersionFileEntity, Integer> {
-    @Query("select wr from WarehouseReservationVersionFileEntity wr WHERE wr.orderID = :orderID")
+public interface WarehouseStockVersionFileRepository extends CrudRepository<WarehouseStockVersionFileEntity, Integer> {
+    @Query("select wr from WarehouseStockVersionFileEntity wr WHERE wr.orderID = :orderID")
     @Transactional(readOnly = true)
-    Optional<WarehouseReservationVersionFileEntity> findByOrderID(@Param("orderID") Integer orderID);
+    Optional<WarehouseStockVersionFileEntity> findByOrderID(@Param("orderID") Integer orderID);
 }

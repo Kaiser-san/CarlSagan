@@ -19,11 +19,10 @@ public class WarehouseMQSender implements LogServiceInterface {
     @Autowired
     private Queue logInputQueue;
 
-    public void sendSuccessOrchestration(int orderID, Integer warehouseReservationID, Integer cost) {
+    public void sendSuccessOrchestration(int orderID, Integer cost) {
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("validated", true);
         jsonMessage.put("orderID", orderID);
-        jsonMessage.put("warehouseReservationID", warehouseReservationID);
         jsonMessage.put("cost", cost);
         String message = jsonMessage.toString();
         this.template.convertAndSend(warehouseOutputOrchestrationQueue.getName(), message);
@@ -39,11 +38,10 @@ public class WarehouseMQSender implements LogServiceInterface {
         this.log("[WarehouseService::sendFailureOrchestration] sent " + message);
     }
 
-    public void sendSuccessChoreography(int orderID, Integer warehouseReservationID, Integer cost) {
+    public void sendSuccessChoreography(int orderID, Integer cost) {
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("validated", true);
         jsonMessage.put("orderID", orderID);
-        jsonMessage.put("warehouseReservationID", warehouseReservationID);
         jsonMessage.put("cost", cost);
         String message = jsonMessage.toString();
         this.template.convertAndSend(warehouseOutputChoreographyQueue.getName(), message);

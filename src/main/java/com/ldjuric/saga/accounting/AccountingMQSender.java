@@ -26,7 +26,6 @@ public class AccountingMQSender implements LogServiceInterface {
         jsonMessage.put("validated", true);
         jsonMessage.put("orderID", orderID);
         jsonMessage.put("accountingTransactionID", accountingTransaction.getId());
-        jsonMessage.put("warehouseReservationID", accountingTransaction.getWarehouseReservationID());
         jsonMessage.put("cost", accountingTransaction.getCost());
         String message = jsonMessage.toString();
         this.template.convertAndSend(accountingFanout.getName(),"", message);

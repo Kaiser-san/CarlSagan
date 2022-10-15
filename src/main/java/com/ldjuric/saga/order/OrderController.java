@@ -12,18 +12,18 @@ import org.springframework.web.bind.annotation.*;
 
 public class OrderController {
     @Autowired
-    private OrderServiceInterface orderService;
+    private OrderService orderService;
 
     @Autowired
     private OrderMQSender orderSender;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUser(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getOrder(@PathVariable("id") Integer id) {
         String result = orderService.getOrder(id);
         if(!result.isEmpty())
             return ResponseEntity.status(HttpStatus.OK).body(result);
         else
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid user");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid order");
     }
 
     @PutMapping("/orchestration/create/{orderType}/{username}/{password}")

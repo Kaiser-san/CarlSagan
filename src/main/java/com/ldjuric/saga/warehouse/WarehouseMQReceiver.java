@@ -5,11 +5,9 @@ import org.json.JSONObject;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Optional;
-
 public class WarehouseMQReceiver {
     @Autowired
-    private WarehouseServiceInterface warehouseService;
+    private WarehouseService warehouseService;
 
     @Autowired
     private WarehouseMQSender sender;
@@ -20,14 +18,7 @@ public class WarehouseMQReceiver {
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         int orderType = jsonObject.getInt("orderType");
-        WarehouseReservationStatusEnum status = warehouseService.createReservation(orderID, orderType);
-        if (status == WarehouseReservationStatusEnum.FINALIZED) {
-            WarehouseReservationEntity reservation = warehouseService.getWarehouseReservation(orderID);
-            sender.sendSuccessOrchestration(orderID, reservation.getId(), reservation.getWarehouse().getCost());
-        }
-        else if (status == WarehouseReservationStatusEnum.REJECTED){
-            sender.sendFailureOrchestration(orderID);
-        }
+        warehouseService.createOrderOrchestration(orderID, orderType);
     }
 
     @RabbitListener(queues = "#{warehouseOrderOutputQueue.name}")
@@ -36,14 +27,7 @@ public class WarehouseMQReceiver {
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         int orderType = jsonObject.getInt("orderType");
-        WarehouseReservationStatusEnum status = warehouseService.createReservation(orderID, orderType);
-        if (status == WarehouseReservationStatusEnum.FINALIZED) {
-            WarehouseReservationEntity reservation = warehouseService.getWarehouseReservation(orderID);
-            sender.sendSuccessChoreography(orderID, reservation.getId(), reservation.getWarehouse().getCost());
-        }
-        else if (status == WarehouseReservationStatusEnum.REJECTED){
-            sender.sendFailureChoreography(orderID);
-        }
+        warehouseService.createOrderChoreography(orderID, orderType);
     }
 
     @RabbitListener(queues = "#{warehouseAccountingOutputQueue.name}")

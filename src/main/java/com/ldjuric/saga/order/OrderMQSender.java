@@ -61,7 +61,6 @@ public class OrderMQSender implements LogServiceInterface {
         jsonMessage.put("orderID", orderEntity.getId());
         jsonMessage.put("orderType", orderEntity.getOrderType());
         jsonMessage.put("username", orderEntity.getUsername());
-        jsonMessage.put("warehouseReservationID", orderEntity.getWarehouseReservationID());
         jsonMessage.put("cost", orderEntity.getCost());
         String message = jsonMessage.toString();
         this.template.convertAndSend(accountingInputOrchestrationQueue.getName(), message);

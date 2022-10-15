@@ -1,6 +1,6 @@
 package com.ldjuric.saga.warehouse;
 
-public enum WarehouseReservationStatusEnum {
+public enum WarehouseStockStatusEnum {
     INITIALIZING,
     FINALIZED,
     REJECTED

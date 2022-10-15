@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins="*", maxAge=3600)
 public class WarehouseController {
     @Autowired
-    private WarehouseServiceInterface warehouseService;
+    private WarehouseService warehouseService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getWarehouseName(@PathVariable("id") Integer id) {
-        String result = warehouseService.getWarehouseName(id);
+    public ResponseEntity<?> getWarehouse(@PathVariable("id") Integer id) {
+        String result = warehouseService.getWarehouse(id);
         if(!result.isEmpty())
             return ResponseEntity.status(HttpStatus.OK).body(result);
         else

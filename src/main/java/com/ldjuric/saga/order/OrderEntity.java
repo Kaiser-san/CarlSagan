@@ -19,9 +19,6 @@ public class OrderEntity {
     @Column(name = "username")
     private String username;
 
-    @Column(name = "warehouse_reservation_id")
-    private Integer warehouseReservationID;
-
     @Column(name = "cost")
     private Integer cost;
 

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class AccountingService implements AccountingServiceInterface {
+public class AccountingService {
     @Autowired
     private AccountingRepository accountingRepository;
     @Autowired
@@ -22,14 +22,12 @@ public class AccountingService implements AccountingServiceInterface {
     @Autowired
     private AccountingMQSender sender;
 
-    @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public Optional<AccountingTransactionEntity> createAndValidateOrderOrchestration(int orderID, int orderType, int warehouseReservationID, int cost, String username) {
+    public Optional<AccountingTransactionEntity> createAndValidateOrderOrchestration(int orderID, int orderType, int cost, String username) {
         sender.log("[AccountingService::createAndValidateOrderOrchestration] start");
         AccountingTransactionEntity transactionEntity = new AccountingTransactionEntity();
         transactionEntity.setOrderID(orderID);
         transactionEntity.setOrderType(orderType);
-        transactionEntity.setWarehouseReservationID(warehouseReservationID);
         transactionEntity.setCost(cost);
 
         Optional<AccountingEntity> accountingEntity = accountingRepository.findByUsername(username);
@@ -48,7 +46,6 @@ public class AccountingService implements AccountingServiceInterface {
         return Optional.of(transactionEntity);
     }
 
-    @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public AccountingTransactionStatusEnum createOrValidateOrder(int orderID, int orderType) {
         sender.log("[AccountingService::createOrValidateOrder] start");
@@ -65,9 +62,8 @@ public class AccountingService implements AccountingServiceInterface {
         return this.validateTransaction(orderID);
     }
 
-    @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public AccountingTransactionStatusEnum createOrValidateWarehouse(int orderID, int warehouseReservationID, int cost, boolean validated) {
+    public AccountingTransactionStatusEnum createOrValidateWarehouse(int orderID, int cost, boolean validated) {
         sender.log("[AccountingService::createOrValidateOrder] start; orderID:" + orderID);
         Optional<AccountingTransactionVersionFileEntity> transactionVersionEntity = this.getOrCreateTransactionEntityVersionFile(orderID);
         if (transactionVersionEntity.isEmpty()) {
@@ -75,20 +71,18 @@ public class AccountingService implements AccountingServiceInterface {
             return AccountingTransactionStatusEnum.INITIALIZING;
         }
 
-        transactionVersionEntity.get().setWarehouseReservationID(warehouseReservationID);
         transactionVersionEntity.get().setCost(cost);
         accountingTransactionVersionFileRepository.save(transactionVersionEntity.get());
         sender.log("[AccountingService::createOrValidateOrder] saved version file; orderID:" + orderID);
 
         if (!validated) {
-            sender.log("[AccountingService::createOrValidateOrder] invalid warehouse reservation, rejecting; orderID:" + orderID);
+            sender.log("[AccountingService::createOrValidateOrder] invalid warehouse stock, rejecting; orderID:" + orderID);
             return AccountingTransactionStatusEnum.REJECTED;
         }
 
         return this.validateTransaction(orderID);
     }
 
-    @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public AccountingTransactionStatusEnum createOrValidateUser(int orderID, String username, boolean validated) {
         sender.log("[AccountingService::createOrValidateOrder] start; orderID:" + orderID);
@@ -124,7 +118,6 @@ public class AccountingService implements AccountingServiceInterface {
         return this.validateTransaction(orderID);
     }
 
-    @Override
     public AccountingTransactionEntity getTransaction(int orderID) {
         Optional<AccountingTransactionEntity> accountingTransaction = accountingTransactionRepository.findByOrderID(orderID);
         return accountingTransaction.orElse(null);
@@ -135,7 +128,6 @@ public class AccountingService implements AccountingServiceInterface {
         List<AccountingTransactionVersionFileEntity> versionFileEntities = accountingTransactionVersionFileRepository.findAllByOrderID(orderID);
         Integer orderType = null;
         AccountingEntity accountingEntity = null;
-        Integer warehouseReservationID = null;
         Integer cost = null;
 
         for (AccountingTransactionVersionFileEntity versionFileEntity : versionFileEntities) {
@@ -154,9 +146,6 @@ public class AccountingService implements AccountingServiceInterface {
             if (versionFileEntity.getAccountingEntity() != null) {
                 accountingEntity = versionFileEntity.getAccountingEntity();
             }
-            if (versionFileEntity.getWarehouseReservationID() != null) {
-                warehouseReservationID = versionFileEntity.getWarehouseReservationID();
-            }
             if (versionFileEntity.getCost() != null) {
                 cost = versionFileEntity.getCost();
             }
@@ -164,7 +153,6 @@ public class AccountingService implements AccountingServiceInterface {
 
         if (orderType != null
                 && accountingEntity != null
-                && warehouseReservationID != null
                 && cost != null) {
 
             if (accountingEntity.getCredit() < cost) {
@@ -193,7 +181,6 @@ public class AccountingService implements AccountingServiceInterface {
             AccountingTransactionEntity transactionEntity = new AccountingTransactionEntity();
             transactionEntity.setOrderID(orderID);
             transactionEntity.setOrderType(orderType);
-            transactionEntity.setWarehouseReservationID(warehouseReservationID);
             transactionEntity.setCost(cost);
             transactionEntity.setAccountingEntity(accountingEntity);
             accountingTransactionRepository.save(transactionEntity);

@@ -6,23 +6,19 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@Table(name = "warehouse_reservation")
-public class WarehouseReservationEntity {
+@Table(name = "warehouse_stock_version_file")
+public class WarehouseStockVersionFileEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne()
-    @JoinColumn(name = "warehouse_id")
-    private WarehouseEntity warehouse;
-
-    @Column(name = "order_id")
+    @Column(name = "order_id", nullable = false, unique = true)
     private Integer orderID;
 
-    @Column(name = "order_type")
+    @Column(name = "order_type", nullable = false, unique = true)
     private Integer orderType;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private WarehouseReservationStatusEnum status;
+    private WarehouseStockStatusEnum status;
 }

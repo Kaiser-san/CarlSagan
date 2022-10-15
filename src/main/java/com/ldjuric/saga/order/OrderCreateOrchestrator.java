@@ -52,7 +52,7 @@ public class OrderCreateOrchestrator {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void warehouseValidated(int orderID, int warehouseReservationID, int cost, boolean validated) {
+    public void warehouseValidated(int orderID, int cost, boolean validated) {
         Optional<OrderEntity> orderEntity = orderRepository.findById(orderID);
         if (orderEntity.isEmpty()) {
             sender.log("[OrderCreateOrchestrator::warehouseValidated] order deleted, do nothing; orderID:" + orderID);
@@ -65,7 +65,6 @@ public class OrderCreateOrchestrator {
             return;
         }
 
-        orderEntity.get().setWarehouseReservationID(warehouseReservationID);
         orderEntity.get().setCost(cost);
         orderRepository.save(orderEntity.get());
         sender.log("[OrderCreateOrchestrator::warehouseValidated] order updated; orderID:" + orderID);
@@ -98,6 +97,6 @@ public class OrderCreateOrchestrator {
     }
 
     private boolean validateUserAndWarehouse(OrderEntity orderEntity) {
-        return orderEntity.getUsername() != null && !orderEntity.getUsername().isEmpty() && orderEntity.getWarehouseReservationID() != null;
+        return orderEntity.getUsername() != null && !orderEntity.getUsername().isEmpty() && orderEntity.getCost() != null;
     }
 }
