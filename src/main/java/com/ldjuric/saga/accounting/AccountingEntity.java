@@ -1,11 +1,11 @@
 package com.ldjuric.saga.accounting;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.ldjuric.saga.order.OrderStatusEnum;
 import lombok.Data;
+import org.springframework.context.annotation.Profile;
 
 import javax.persistence.*;
 
+@Profile({"accounting", "all"})
 @Entity
 @Data
 @Table(name = "accounting")

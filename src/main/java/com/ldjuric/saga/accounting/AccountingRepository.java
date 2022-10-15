@@ -1,5 +1,6 @@
 package com.ldjuric.saga.accounting;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -8,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+@Profile({"accounting", "all"})
 @Repository
 @Transactional
 public interface AccountingRepository extends CrudRepository<AccountingEntity, Integer> {

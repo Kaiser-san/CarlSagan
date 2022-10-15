@@ -1,11 +1,12 @@
 package com.ldjuric.saga.accounting;
 
-import com.ldjuric.saga.interfaces.AccountingServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Profile({"accounting", "all"})
 @RestController
 @RequestMapping("/accounting")
 @CrossOrigin(origins="*", maxAge=3600)

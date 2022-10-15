@@ -1,11 +1,12 @@
 package com.ldjuric.saga.warehouse;
 
-import com.ldjuric.saga.interfaces.WarehouseServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Profile({"warehouse", "all"})
 @RestController
 @RequestMapping("/warehouse")
 @CrossOrigin(origins="*", maxAge=3600)

@@ -2,9 +2,11 @@ package com.ldjuric.saga.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.springframework.context.annotation.Profile;
 
 import javax.persistence.*;
 
+@Profile({"user", "all"})
 @Entity
 @Data
 @Table(name = "user")

@@ -1,10 +1,11 @@
 package com.ldjuric.saga.warehouse;
 
-import com.ldjuric.saga.interfaces.WarehouseServiceInterface;
 import org.json.JSONObject;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 
+@Profile({"warehouse", "all"})
 public class WarehouseMQReceiver {
     @Autowired
     private WarehouseService warehouseService;

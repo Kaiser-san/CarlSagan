@@ -1,11 +1,11 @@
 package com.ldjuric.saga.order;
 
-import com.ldjuric.saga.accounting.AccountingMQSender;
-import com.ldjuric.saga.interfaces.OrderServiceInterface;
 import org.json.JSONObject;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 
+@Profile({"order", "all"})
 public class OrderMQReceiver {
     @Autowired
     private OrderService orderService;

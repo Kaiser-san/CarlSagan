@@ -4,7 +4,9 @@ import com.ldjuric.saga.interfaces.UserServiceInterface;
 import org.json.JSONObject;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 
+@Profile({"user", "all"})
 public class UserMQReceiver {
     @Autowired
     private UserServiceInterface userService;

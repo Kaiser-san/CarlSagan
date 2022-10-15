@@ -1,9 +1,11 @@
 package com.ldjuric.saga.accounting;
 
 import lombok.Data;
+import org.springframework.context.annotation.Profile;
 
 import javax.persistence.*;
 
+@Profile({"accounting", "all"})
 @Entity
 @Data
 @Table(name = "accounting_transaction_version_file")

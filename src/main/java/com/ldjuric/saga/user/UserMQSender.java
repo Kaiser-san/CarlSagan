@@ -5,8 +5,9 @@ import org.json.JSONObject;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.context.annotation.Profile;
 
+@Profile({"user", "all"})
 public class UserMQSender implements LogServiceInterface {
     @Autowired
     private RabbitTemplate template;

@@ -2,10 +2,12 @@ package com.ldjuric.saga.user;
 
 import com.ldjuric.saga.interfaces.UserServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Profile({"user", "all"})
 @RestController
 @RequestMapping("/user")
 @CrossOrigin(origins="*", maxAge=3600)

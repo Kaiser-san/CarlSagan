@@ -1,9 +1,11 @@
 package com.ldjuric.saga.warehouse;
 
 import lombok.Data;
+import org.springframework.context.annotation.Profile;
 
 import javax.persistence.*;
 
+@Profile({"warehouse", "all"})
 @Entity
 @Data
 @Table(name = "warehouse_stock")

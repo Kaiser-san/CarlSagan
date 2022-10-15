@@ -1,12 +1,13 @@
 package com.ldjuric.saga.accounting;
 
-import com.ldjuric.saga.interfaces.AccountingServiceInterface;
 import org.json.JSONObject;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 
 import java.util.Optional;
 
+@Profile({"accounting", "all"})
 public class AccountingMQReceiver {
     @Autowired
     private AccountingService accountingService;

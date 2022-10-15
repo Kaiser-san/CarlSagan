@@ -1,13 +1,14 @@
 package com.ldjuric.saga.order;
 
-import com.ldjuric.saga.interfaces.OrderServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 
+@Profile({"order", "all"})
 @Service
 public class OrderService {
 

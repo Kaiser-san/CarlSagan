@@ -1,5 +1,6 @@
 package com.ldjuric.saga.warehouse;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 
+@Profile({"warehouse", "all"})
 @Repository
 public interface WarehouseStockVersionFileRepository extends CrudRepository<WarehouseStockVersionFileEntity, Integer> {
     @Query("select wr from WarehouseStockVersionFileEntity wr WHERE wr.orderID = :orderID")

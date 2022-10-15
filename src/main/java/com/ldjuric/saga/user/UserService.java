@@ -2,8 +2,10 @@ package com.ldjuric.saga.user;
 
 import com.ldjuric.saga.interfaces.UserServiceInterface;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+@Profile({"user", "all"})
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserServiceInterface {

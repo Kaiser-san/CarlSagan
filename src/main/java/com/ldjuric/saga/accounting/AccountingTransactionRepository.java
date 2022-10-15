@@ -1,14 +1,15 @@
 package com.ldjuric.saga.accounting;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
+@Profile({"accounting", "all"})
 @Repository
 @Transactional
 public interface AccountingTransactionRepository extends CrudRepository<AccountingTransactionEntity, Integer> {

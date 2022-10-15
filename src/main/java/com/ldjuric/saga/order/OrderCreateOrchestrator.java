@@ -1,11 +1,13 @@
 package com.ldjuric.saga.order;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+@Profile({"order", "all"})
 public class OrderCreateOrchestrator {
 
     @Autowired

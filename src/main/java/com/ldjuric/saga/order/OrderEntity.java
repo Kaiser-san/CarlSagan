@@ -1,10 +1,11 @@
 package com.ldjuric.saga.order;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.springframework.context.annotation.Profile;
 
 import javax.persistence.*;
 
+@Profile({"order", "all"})
 @Entity
 @Data
 @Table(name = "order_table")

@@ -1,7 +1,7 @@
 package com.ldjuric.saga.accounting;
 
-import com.ldjuric.saga.interfaces.AccountingServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+@Profile({"accounting", "all"})
 @Service
 public class AccountingService {
     @Autowired
