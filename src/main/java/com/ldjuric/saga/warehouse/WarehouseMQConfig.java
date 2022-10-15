@@ -10,6 +10,10 @@ public class WarehouseMQConfig {
     public Queue warehouseInputQueue() {
         return new Queue("warehouse_input", true);
     }
+    @Bean
+    public Queue warehouseInputInvalidateQueue() {
+        return new Queue("warehouse_input_invalidate", true);
+    }
 
     @Bean
     public Queue warehouseOutputOrchestrationQueue() {

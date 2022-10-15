@@ -13,12 +13,21 @@ public class WarehouseMQReceiver {
     private WarehouseMQSender sender;
 
     @RabbitListener(queues = "warehouse_input")
-    public void receiveCreateReservationOrchestration(String in) {
+    public void receiveCreateOrderOrchestration(String in) {
         sender.log("[WarehouseService::receiveCreateReservationOrchestration] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         int orderType = jsonObject.getInt("orderType");
         warehouseService.createOrderOrchestration(orderID, orderType);
+    }
+
+    @RabbitListener(queues = "warehouse_input_invalidate")
+    public void receiveInvalidateOrderOrchestration(String in) {
+        sender.log("[WarehouseService::receiveInvalidateOrderOrchestration] '" + in + "'");
+        JSONObject jsonObject = new JSONObject(in);
+        int orderID = jsonObject.getInt("orderID");
+        boolean validated = jsonObject.getBoolean("validated");
+        warehouseService.validateReservation(orderID, validated);
     }
 
     @RabbitListener(queues = "#{warehouseOrderOutputQueue.name}")

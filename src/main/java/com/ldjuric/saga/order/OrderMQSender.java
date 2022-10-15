@@ -21,6 +21,9 @@ public class OrderMQSender implements LogServiceInterface {
     private Queue warehouseInputQueue;
 
     @Autowired
+    private Queue warehouseInputInvalidateQueue;
+
+    @Autowired
     private Queue accountingInputOrchestrationQueue;
 
     @Autowired
@@ -47,12 +50,21 @@ public class OrderMQSender implements LogServiceInterface {
         this.log("[OrderService::sendUserValidate] sent " + message);
     }
 
-    public void sendKitchenValidate(Integer orderID, Integer orderType) {
+    public void sendWarehouseValidate(Integer orderID, Integer orderType) {
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("orderID", orderID);
         jsonMessage.put("orderType", orderType);
         String message = jsonMessage.toString();
         this.template.convertAndSend(warehouseInputQueue.getName(), message);
+        this.log("[OrderService::sendKitchenValidate] sent " + message);
+    }
+
+    public void sendWarehouseInvalidate(int orderID, Integer orderType) {
+        JSONObject jsonMessage = new JSONObject();
+        jsonMessage.put("orderID", orderID);
+        jsonMessage.put("orderType", orderType);
+        String message = jsonMessage.toString();
+        this.template.convertAndSend(warehouseInputInvalidateQueue.getName(), message);
         this.log("[OrderService::sendKitchenValidate] sent " + message);
     }
 
