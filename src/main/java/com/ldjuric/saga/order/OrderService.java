@@ -42,14 +42,15 @@ public class OrderService {
     }
 
     @Transactional
-    public Integer choreographyCreate(Integer orderType, String username, String password) {
+    public void choreographyCreate(Integer orderType, String username, String password) {
         sender.log("[OrderService::choreographyCreate] start; orderType:" + orderType);
         OrderEntity orderEntity = new OrderEntity();
         orderEntity.setOrderType(orderType);
         orderEntity.setUsername(username);
         orderEntity.setStatus(OrderStatusEnum.INITIALIZING);
         orderRepository.save(orderEntity);
-        return orderEntity.getId();
+
+        sender.sendChoreography(orderEntity.getId(), orderType, username, password);
     }
 
     @Transactional

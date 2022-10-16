@@ -41,8 +41,7 @@ public class OrderController {
 
     @PutMapping("/choreography/create/{orderType}/{username}/{password}")
     public ResponseEntity<?> choreographyCreate(@PathVariable("orderType") Integer orderType, @PathVariable("username") String username, @PathVariable("password") String password) {
-        Integer orderID = orderService.choreographyCreate(orderType, username, password);
-        orderSender.sendChoreography(orderID, orderType, username, password);
+        orderService.choreographyCreate(orderType, username, password);
         return ResponseEntity.status(HttpStatus.OK).body("Request sent");
     }
 }

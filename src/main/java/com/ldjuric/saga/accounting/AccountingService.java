@@ -203,10 +203,7 @@ public class AccountingService implements AccountingServiceInterface {
             }
         }
 
-        if (orderType != null
-                && accountingEntity != null
-                && cost != null) {
-
+        if (orderType != null && accountingEntity != null && cost != null) {
             if (accountingEntity.getCredit() < cost) {
                 sender.log("[AccountingService::validateTransaction] not enough money, reject; orderID:" + orderID);
 

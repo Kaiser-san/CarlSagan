@@ -32,6 +32,6 @@ public class UserMQReceiver {
         int orderID = jsonObject.getInt("orderID");
         String username = jsonObject.get("username").toString();
         String password = jsonObject.get("password").toString();
-        userService.validateUserOrchestration(orderID, username, password);
+        userService.validateUserChoreography(orderID, username, password);
     }
 }
