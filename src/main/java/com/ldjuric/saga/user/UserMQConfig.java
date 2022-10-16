@@ -10,7 +10,7 @@ public class UserMQConfig {
 
     @Bean
     public Queue userInputQueue() {
-        return new Queue("user_input", true);
+        return new Queue("user_input_orchestration", true);
     }
 
     @Bean

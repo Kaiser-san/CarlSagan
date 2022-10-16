@@ -1,6 +1,9 @@
 package com.ldjuric.saga.order;
 
+import com.ldjuric.saga.interfaces.AccountingServiceInterface;
 import com.ldjuric.saga.interfaces.LogServiceInterface;
+import com.ldjuric.saga.interfaces.UserServiceInterface;
+import com.ldjuric.saga.interfaces.WarehouseServiceInterface;
 import org.json.JSONObject;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
@@ -9,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 
 @Profile({"order", "all"})
-public class OrderMQSender implements LogServiceInterface {
+public class OrderMessageSender implements LogServiceInterface, AccountingServiceInterface, UserServiceInterface, WarehouseServiceInterface {
     @Autowired
     private RabbitTemplate template;
 
@@ -42,7 +45,8 @@ public class OrderMQSender implements LogServiceInterface {
         this.log("[OrderService::sendChoreography] sent " + message);
     }
 
-    public void sendUserValidateOrchestration(Integer orderID, String username, String password) {
+    @Override
+    public void validateUserOrchestration(Integer orderID, String username, String password) {
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("orderID", orderID);
         jsonMessage.put("username", username);
@@ -52,7 +56,8 @@ public class OrderMQSender implements LogServiceInterface {
         this.log("[OrderService::sendUserValidate] sent " + message);
     }
 
-    public void sendWarehouseCreateOrderOrchestration(Integer orderID, Integer orderType) {
+    @Override
+    public void createOrderOrchestration(Integer orderID, Integer orderType) {
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("orderID", orderID);
         jsonMessage.put("orderType", orderType);
@@ -61,7 +66,8 @@ public class OrderMQSender implements LogServiceInterface {
         this.log("[OrderService::sendKitchenValidate] sent " + message);
     }
 
-    public void sendWarehouseValidate(int orderID, Integer orderType, boolean validated) {
+    @Override
+    public void validateOrder(Integer orderID, Integer orderType, boolean validated) {
         JSONObject jsonMessage = new JSONObject();
         jsonMessage.put("orderID", orderID);
         jsonMessage.put("orderType", orderType);
@@ -71,12 +77,13 @@ public class OrderMQSender implements LogServiceInterface {
         this.log("[OrderService::sendKitchenValidate] sent " + message);
     }
 
-    public void sendAccountingValidate(OrderEntity orderEntity) {
+    @Override
+    public void validateOrderOrchestration(Integer orderID, Integer orderType, String username, Integer cost) {
         JSONObject jsonMessage = new JSONObject();
-        jsonMessage.put("orderID", orderEntity.getId());
-        jsonMessage.put("orderType", orderEntity.getOrderType());
-        jsonMessage.put("username", orderEntity.getUsername());
-        jsonMessage.put("cost", orderEntity.getCost());
+        jsonMessage.put("orderID", orderID);
+        jsonMessage.put("orderType", orderType);
+        jsonMessage.put("username", username);
+        jsonMessage.put("cost", cost);
         String message = jsonMessage.toString();
         this.template.convertAndSend(accountingInputOrchestrationQueue.getName(), message);
         this.log("[OrderService::sendAccountingValidate] sent " + message);

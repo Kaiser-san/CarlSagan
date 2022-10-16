@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 
 @Profile({"order", "all"})
-public class OrderMQReceiver {
+public class OrderMessageReceiver {
     @Autowired
     private OrderService orderService;
 
@@ -14,7 +14,7 @@ public class OrderMQReceiver {
     private OrderCreateOrchestrator orderCreateOrchestrator;
 
     @Autowired
-    private OrderMQSender sender;
+    private OrderMessageSender sender;
 
     @RabbitListener(queues = "#{orderAccountingOutputQueue.name}")
     public void receiveAccountingOutputChoreography(String in) {

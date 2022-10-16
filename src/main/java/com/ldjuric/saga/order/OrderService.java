@@ -11,7 +11,6 @@ import java.util.Optional;
 @Profile({"order", "all"})
 @Service
 public class OrderService {
-
     @Autowired
     private OrderCreateOrchestrator orderCreateOrchestrator;
 
@@ -19,7 +18,17 @@ public class OrderService {
     private OrderRepository orderRepository;
 
     @Autowired
-    private OrderMQSender sender;
+    private OrderMessageSender sender;
+
+    public String getOrders() {
+        StringBuilder stringBuilder = new StringBuilder();
+        Iterable<OrderEntity> allOrders = orderRepository.findAll();
+        for (OrderEntity orderEntity : allOrders) {
+            stringBuilder.append(orderEntity.toString());
+            stringBuilder.append(System.getProperty("line.separator"));
+        }
+        return stringBuilder.toString();
+    }
 
     public String getOrder(Integer orderID) {
         Optional<OrderEntity> order = orderRepository.findById(orderID);

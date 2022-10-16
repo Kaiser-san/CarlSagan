@@ -12,7 +12,7 @@ public class LogMQReceiver {
     @RabbitListener(queues = "log_input")
     public void receive(String in) {
         System.out.println("Log " + in);
-        logService.addLog(in);
+        logService.log(in);
     }
 
 }

@@ -9,11 +9,11 @@ import org.springframework.context.annotation.Profile;
 public class WarehouseMQConfig {
     @Bean
     public Queue warehouseInputQueue() {
-        return new Queue("warehouse_input", true);
+        return new Queue("warehouse_input_orchestration", true);
     }
     @Bean
     public Queue warehouseInputValidateQueue() {
-        return new Queue("warehouse_input_validate", true);
+        return new Queue("warehouse_input_validate_orchestration", true);
     }
 
     @Bean

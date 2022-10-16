@@ -1,5 +1,6 @@
 package com.ldjuric.saga.accounting;
 
+import com.ldjuric.saga.interfaces.AccountingServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,7 @@ import java.util.Optional;
 
 @Profile({"accounting", "all"})
 @Service
-public class AccountingService {
+public class AccountingService implements AccountingServiceInterface {
     @Autowired
     private AccountingRepository accountingRepository;
     @Autowired
@@ -23,8 +24,56 @@ public class AccountingService {
     @Autowired
     private AccountingMQSender sender;
 
+    public String getAccounts() {
+        StringBuilder stringBuilder = new StringBuilder();
+        Iterable<AccountingEntity> accountingEntities = accountingRepository.findAll();
+        for (AccountingEntity accountingEntity : accountingEntities) {
+            stringBuilder.append(accountingEntity.toString());
+            stringBuilder.append(System.getProperty("line.separator"));
+        }
+        return stringBuilder.toString();
+    }
+
+    public String getAccount(String username) {
+        Optional<AccountingEntity> accountingEntity = accountingRepository.findByUsername(username);
+        return accountingEntity.isPresent() ? accountingEntity.get().toString() : "";
+    }
+
+    public String getTransactions() {
+        StringBuilder stringBuilder = new StringBuilder();
+        Iterable<AccountingTransactionEntity> accountingTransactionEntities = accountingTransactionRepository.findAll();
+        for (AccountingTransactionEntity accountingTransactionEntity : accountingTransactionEntities) {
+            stringBuilder.append(accountingTransactionEntity.toString());
+            stringBuilder.append(System.getProperty("line.separator"));
+        }
+        return stringBuilder.toString();
+    }
+
+    public String getVersionFiles() {
+        StringBuilder stringBuilder = new StringBuilder();
+        Iterable<AccountingTransactionVersionFileEntity> versionFileEntities = accountingTransactionVersionFileRepository.findAll();
+        for (AccountingTransactionVersionFileEntity versionFile : versionFileEntities) {
+            stringBuilder.append(versionFile.toString());
+            stringBuilder.append(System.getProperty("line.separator"));
+        }
+        return stringBuilder.toString();
+    }
+
+    public boolean createAccount(String username, Integer credit) {
+        Optional<AccountingEntity> existingAccountingEntity = accountingRepository.findByUsername(username);
+        if (existingAccountingEntity.isPresent()) {
+            return false;
+        }
+
+        AccountingEntity accountingEntity = new AccountingEntity();
+        accountingEntity.setUsername(username);
+        accountingEntity.setCredit(credit);
+        accountingRepository.save(accountingEntity);
+        return true;
+    }
+
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public Optional<AccountingTransactionEntity> createAndValidateOrderOrchestration(int orderID, int orderType, int cost, String username) {
+    public void validateOrderOrchestration(Integer orderID, Integer orderType, String username, Integer cost) {
         sender.log("[AccountingService::createAndValidateOrderOrchestration] start");
         AccountingTransactionEntity transactionEntity = new AccountingTransactionEntity();
         transactionEntity.setOrderID(orderID);
@@ -40,38 +89,38 @@ public class AccountingService {
         }
         else {
             sender.log("[AccountingService::createAndValidateOrderOrchestration] not enough credit; orderID:" + orderID);
-            return Optional.empty();
+            sender.sendFailureOrchestration(orderID);
         }
 
         accountingTransactionRepository.save(transactionEntity);
         sender.log("[AccountingService::createAndValidateOrderOrchestration] saved transaction; orderID:" + orderID);
 
-        return Optional.of(transactionEntity);
+        sender.sendSuccessOrchestration(orderID, transactionEntity);
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public AccountingTransactionStatusEnum createOrValidateOrder(int orderID, int orderType) {
+    public void createOrValidateOrder(int orderID, int orderType) {
         sender.log("[AccountingService::createOrValidateOrder] start");
         Optional<AccountingTransactionVersionFileEntity> transactionVersionEntity = this.getOrCreateTransactionEntityVersionFile(orderID);
         if (transactionVersionEntity.isEmpty()) {
             sender.log("[AccountingService::createOrValidateOrder] already rejected; orderID:" + orderID);
-            return AccountingTransactionStatusEnum.INITIALIZING;
+            return;
         }
 
         transactionVersionEntity.get().setOrderType(orderType);
         accountingTransactionVersionFileRepository.save(transactionVersionEntity.get());
         sender.log("[AccountingService::createOrValidateOrder] saved version file; orderID:" + orderID);
 
-        return this.validateTransaction(orderID);
+        sendResponseChoreography(orderID, this.validateTransaction(orderID));
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public AccountingTransactionStatusEnum createOrValidateWarehouse(int orderID, int cost, boolean validated) {
+    public void createOrValidateWarehouse(int orderID, int cost, boolean validated) {
         sender.log("[AccountingService::createOrValidateOrder] start; orderID:" + orderID);
         Optional<AccountingTransactionVersionFileEntity> transactionVersionEntity = this.getOrCreateTransactionEntityVersionFile(orderID);
         if (transactionVersionEntity.isEmpty()) {
             sender.log("[AccountingService::createOrValidateOrder] already rejected; orderID:" + orderID);
-            return AccountingTransactionStatusEnum.INITIALIZING;
+            return;
         }
 
         transactionVersionEntity.get().setCost(cost);
@@ -80,19 +129,19 @@ public class AccountingService {
 
         if (!validated) {
             sender.log("[AccountingService::createOrValidateOrder] invalid warehouse stock, rejecting; orderID:" + orderID);
-            return AccountingTransactionStatusEnum.REJECTED;
+            sender.sendFailureChoreography(orderID);
         }
 
-        return this.validateTransaction(orderID);
+        sendResponseChoreography(orderID, this.validateTransaction(orderID));
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public AccountingTransactionStatusEnum createOrValidateUser(int orderID, String username, boolean validated) {
+    public void createOrValidateUser(int orderID, String username, boolean validated) {
         sender.log("[AccountingService::createOrValidateOrder] start; orderID:" + orderID);
         Optional<AccountingTransactionVersionFileEntity> transactionVersionEntity = this.getOrCreateTransactionEntityVersionFile(orderID);
         if (transactionVersionEntity.isEmpty()) {
             sender.log("[AccountingService::createOrValidateOrder] already rejected; orderID:" + orderID);
-            return AccountingTransactionStatusEnum.INITIALIZING;
+            return;
         }
 
         if (!validated) {
@@ -100,7 +149,7 @@ public class AccountingService {
             transactionVersionEntity.get().setStatus(AccountingTransactionStatusEnum.REJECTED);
             accountingTransactionVersionFileRepository.save(transactionVersionEntity.get());
             sender.log("[AccountingService::createOrValidateOrder] saved version file; orderID:" + orderID);
-            return AccountingTransactionStatusEnum.REJECTED;
+            sender.sendFailureChoreography(orderID);
         }
 
         Optional<AccountingEntity> accountingEntity = accountingRepository.findByUsername(username);
@@ -115,10 +164,10 @@ public class AccountingService {
             transactionVersionEntity.get().setStatus(AccountingTransactionStatusEnum.REJECTED);
             accountingTransactionVersionFileRepository.save(transactionVersionEntity.get());
             sender.log("[AccountingService::createOrValidateOrder] saved version file; orderID:" + orderID);
-            return AccountingTransactionStatusEnum.REJECTED;
+            sender.sendFailureChoreography(orderID);
         }
 
-        return this.validateTransaction(orderID);
+        sendResponseChoreography(orderID, this.validateTransaction(orderID));
     }
 
     public AccountingTransactionEntity getTransaction(int orderID) {
@@ -205,5 +254,14 @@ public class AccountingService {
         versionFile.setOrderID(orderID);
         versionFile.setStatus(AccountingTransactionStatusEnum.INITIALIZING);
         return Optional.of(versionFile);
+    }
+
+    private void sendResponseChoreography(int orderID, AccountingTransactionStatusEnum status) {
+        if (status == AccountingTransactionStatusEnum.REJECTED) {
+            sender.sendFailureChoreography(orderID);
+        }
+        else if (status == AccountingTransactionStatusEnum.FINALIZED) {
+            sender.sendSuccessChoreography(orderID, getTransaction(orderID));
+        }
     }
 }

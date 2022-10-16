@@ -3,7 +3,7 @@ package com.ldjuric.saga.interfaces;
 import com.ldjuric.saga.warehouse.WarehouseStockStatusEnum;
 
 public interface WarehouseServiceInterface {
-    WarehouseStockStatusEnum createOrder(int orderID, int orderType);
+    void createOrderOrchestration(Integer orderID, Integer orderType);
 
-    void validateReservation(int orderID, boolean validated);
+    void validateOrder(Integer orderID, Integer orderType, boolean validated);
 }

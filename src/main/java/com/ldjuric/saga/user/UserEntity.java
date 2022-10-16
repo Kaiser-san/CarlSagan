@@ -21,7 +21,4 @@ public class UserEntity {
     @Column(name = "password", nullable = false)
     @JsonIgnore
     private String password;
-
-    @Column(name = "name")
-    private String name;
 }

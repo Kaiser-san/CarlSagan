@@ -16,7 +16,13 @@ public class OrderController {
     private OrderService orderService;
 
     @Autowired
-    private OrderMQSender orderSender;
+    private OrderMessageSender orderSender;
+
+    @GetMapping()
+    public ResponseEntity<?> getOrders() {
+        String result = orderService.getOrders();
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrder(@PathVariable("id") Integer id) {

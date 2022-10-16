@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 public class UserController {
     @Autowired
-    private UserServiceInterface userService;
+    private UserService userService;
 
     @GetMapping("/{username}")
     public ResponseEntity<?> getUser(@PathVariable("username") String username) {
@@ -25,12 +25,18 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid user");
     }
 
-    @GetMapping("/validate/{username}/{password}")
-    public ResponseEntity<?> validateUser(@PathVariable("username") String username, @PathVariable("password") String password) {
-        boolean result = userService.validateUser(username, password);
+    @GetMapping()
+    public ResponseEntity<?> getUsers() {
+        String result = userService.getUsers();
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @PostMapping("/{username}/{password}")
+    public ResponseEntity<?> createUser(@PathVariable("username") String username, @PathVariable("password") String password) {
+        boolean result = userService.createUser(username, password);
         if(result)
             return ResponseEntity.status(HttpStatus.OK).body("OK");
         else
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Machine busy");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("username exists");
     }
 }

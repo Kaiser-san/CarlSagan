@@ -15,8 +15,8 @@ public class LogController {
     private final LogService logService;
 
     @PutMapping
-    public ResponseEntity<?> addLog(@RequestBody String log) {
-        logService.addLog(log);
+    public ResponseEntity<?> log(@RequestBody String log) {
+        logService.log(log);
         return ResponseEntity.status(HttpStatus.OK).body("Added log");
     }
 

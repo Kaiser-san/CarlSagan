@@ -1,8 +1,7 @@
 CREATE TABLE user(
     id INT(8) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(100) NOT NULL,
-    name VARCHAR(100)
+    password VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE warehouse_stock(
@@ -54,6 +53,6 @@ CREATE TABLE order_table(
 ALTER TABLE accounting_transaction ADD CONSTRAINT FK_Accounting_Transaction_User FOREIGN KEY (accounting_id) REFERENCES accounting(id);
 ALTER TABLE accounting_transaction_version_file ADD CONSTRAINT FK_Accounting_Transaction_Version_Accounting FOREIGN KEY (accounting_id) REFERENCES accounting(id);
 
-INSERT INTO user(username, password, name) VALUES ('admin', 'admin', 'admin');
+INSERT INTO user(username, password) VALUES ('admin', 'admin');
 INSERT INTO accounting(username, credit) VALUES ('admin', 10000);
 INSERT INTO warehouse_stock(order_type, cost, stock) VALUES (1, 100, 5);

@@ -13,7 +13,7 @@ public class WarehouseMQReceiver {
     @Autowired
     private WarehouseMQSender sender;
 
-    @RabbitListener(queues = "warehouse_input")
+    @RabbitListener(queues = "warehouse_input_orchestration")
     public void receiveCreateOrderOrchestration(String in) {
         sender.log("[WarehouseService::receiveCreateReservationOrchestration] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
@@ -22,13 +22,13 @@ public class WarehouseMQReceiver {
         warehouseService.createOrderOrchestration(orderID, orderType);
     }
 
-    @RabbitListener(queues = "warehouse_input_validate")
+    @RabbitListener(queues = "warehouse_input_validate_orchestration")
     public void receiveInvalidateOrderOrchestration(String in) {
         sender.log("[WarehouseService::receiveInvalidateOrderOrchestration] '" + in + "'");
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         boolean validated = jsonObject.getBoolean("validated");
-        warehouseService.validateReservation(orderID, validated);
+        warehouseService.validateOrder(orderID, null, validated);
     }
 
     @RabbitListener(queues = "#{warehouseOrderOutputQueue.name}")
@@ -46,6 +46,6 @@ public class WarehouseMQReceiver {
         JSONObject jsonObject = new JSONObject(in);
         int orderID = jsonObject.getInt("orderID");
         boolean validated = jsonObject.getBoolean("validated");
-        warehouseService.validateReservation(orderID, validated);
+        warehouseService.validateOrder(orderID, null, validated);
     }
 }
