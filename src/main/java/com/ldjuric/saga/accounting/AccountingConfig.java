@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-public class AccountingMQConfig {
+public class AccountingConfig {
 
     @Bean
     public FanoutExchange accountingFanout() {
@@ -25,14 +25,14 @@ public class AccountingMQConfig {
 
     @Profile({"accounting", "all"})
     @Bean
-    public AccountingMQReceiver accountingReceiver() {
-        return new AccountingMQReceiver();
+    public AccountingMessageReceiver accountingReceiver() {
+        return new AccountingMessageReceiver();
     }
 
     @Profile({"accounting", "all"})
     @Bean
-    public AccountingMQSender accountingSender() {
-        return new AccountingMQSender();
+    public AccountingMessageSender accountingSender() {
+        return new AccountingMessageSender();
     }
 
     @Bean

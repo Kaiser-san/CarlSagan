@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 
 @Profile({"accounting", "all"})
-public class AccountingMQSender implements LogServiceInterface {
+public class AccountingMessageSender implements LogServiceInterface {
     @Autowired
     private RabbitTemplate template;
 

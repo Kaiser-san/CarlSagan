@@ -22,7 +22,7 @@ public class AccountingService implements AccountingServiceInterface {
     private AccountingTransactionVersionFileRepository accountingTransactionVersionFileRepository;
 
     @Autowired
-    private AccountingMQSender sender;
+    private AccountingMessageSender sender;
 
     public String getAccounts() {
         StringBuilder stringBuilder = new StringBuilder();

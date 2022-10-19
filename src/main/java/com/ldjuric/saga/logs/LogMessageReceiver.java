@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 
 @Profile({"log", "all"})
-public class LogMQReceiver {
+public class LogMessageReceiver {
     @Autowired
     private LogService logService;
 

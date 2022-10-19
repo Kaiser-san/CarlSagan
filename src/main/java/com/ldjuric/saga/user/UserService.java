@@ -1,8 +1,6 @@
 package com.ldjuric.saga.user;
 
 import com.ldjuric.saga.interfaces.UserServiceInterface;
-import com.ldjuric.saga.order.OrderEntity;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -16,7 +14,7 @@ public class UserService implements UserServiceInterface {
     private UserRepository userRepository;
 
     @Autowired
-    private UserMQSender sender;
+    private UserMessageSender sender;
 
     public String getUser(String username) {
         Optional<UserEntity> user = userRepository.findByUsername(username);

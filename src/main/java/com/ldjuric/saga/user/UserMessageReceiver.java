@@ -1,19 +1,17 @@
 package com.ldjuric.saga.user;
 
-import com.ldjuric.saga.interfaces.UserServiceInterface;
-import com.ldjuric.saga.order.OrderMessageSender;
 import org.json.JSONObject;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 
 @Profile({"user", "all"})
-public class UserMQReceiver {
+public class UserMessageReceiver {
     @Autowired
     private UserService userService;
 
     @Autowired
-    private OrderMessageSender sender;
+    private UserMessageSender sender;
 
     @RabbitListener(queues = "user_input_orchestration")
     public void receiveOrchestration(String in) {

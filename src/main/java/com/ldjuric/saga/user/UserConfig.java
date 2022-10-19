@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-public class UserMQConfig {
+public class UserConfig {
 
     @Bean
     public Queue userInputQueue() {
@@ -25,14 +25,14 @@ public class UserMQConfig {
 
     @Profile({"user", "all"})
     @Bean
-    public UserMQReceiver userReceiver() {
-        return new UserMQReceiver();
+    public UserMessageReceiver userReceiver() {
+        return new UserMessageReceiver();
     }
 
     @Profile({"user", "all"})
     @Bean
-    public UserMQSender userSender() {
-        return new UserMQSender();
+    public UserMessageSender userSender() {
+        return new UserMessageSender();
     }
 
     @Bean

@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 
 @Profile({"warehouse", "all"})
-public class WarehouseMQSender implements LogServiceInterface {
+public class WarehouseMessageSender implements LogServiceInterface {
     @Autowired
     private RabbitTemplate template;
 

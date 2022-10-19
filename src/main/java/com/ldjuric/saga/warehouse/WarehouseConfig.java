@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-public class WarehouseMQConfig {
+public class WarehouseConfig {
     @Bean
     public Queue warehouseInputQueue() {
         return new Queue("warehouse_input_orchestration", true);
@@ -28,14 +28,14 @@ public class WarehouseMQConfig {
 
     @Profile({"warehouse", "all"})
     @Bean
-    public WarehouseMQReceiver warehouseReceiver() {
-        return new WarehouseMQReceiver();
+    public WarehouseMessageReceiver warehouseReceiver() {
+        return new WarehouseMessageReceiver();
     }
 
     @Profile({"warehouse", "all"})
     @Bean
-    public WarehouseMQSender warehouseSender() {
-        return new WarehouseMQSender();
+    public WarehouseMessageSender warehouseSender() {
+        return new WarehouseMessageSender();
     }
 
     @Bean

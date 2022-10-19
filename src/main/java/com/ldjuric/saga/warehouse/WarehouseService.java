@@ -1,7 +1,6 @@
 package com.ldjuric.saga.warehouse;
 
 import com.ldjuric.saga.interfaces.WarehouseServiceInterface;
-import com.ldjuric.saga.user.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,7 @@ public class WarehouseService implements WarehouseServiceInterface {
     private WarehouseStockVersionFileRepository warehouseStockVersionFileRepository;
 
     @Autowired
-    private WarehouseMQSender sender;
+    private WarehouseMessageSender sender;
 
     public String getWarehouseStock() {
         StringBuilder stringBuilder = new StringBuilder();

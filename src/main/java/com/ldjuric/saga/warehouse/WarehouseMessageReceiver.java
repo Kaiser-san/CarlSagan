@@ -6,12 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 
 @Profile({"warehouse", "all"})
-public class WarehouseMQReceiver {
+public class WarehouseMessageReceiver {
     @Autowired
     private WarehouseService warehouseService;
 
     @Autowired
-    private WarehouseMQSender sender;
+    private WarehouseMessageSender sender;
 
     @RabbitListener(queues = "warehouse_input_orchestration")
     public void receiveCreateOrderOrchestration(String in) {
